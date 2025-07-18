@@ -1,0 +1,6 @@
+:root {
+    --font-main: system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+    --cell-size: 50px;
+    --trans-time: .5s;
+}  

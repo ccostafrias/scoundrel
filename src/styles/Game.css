@@ -1,0 +1,79 @@
+.main-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 100vh;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: auto auto;
+    justify-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: black;
+    user-select: none;
+}
+
+/* Top row */
+.dungeon {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.room {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: .5em;
+}
+
+.discard {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+/* Bottom row */
+.equipped-weapon {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: center;
+}
+
+.slain {
+  grid-column: 2;
+  grid-row: 3;
+  text-align: center;
+}
+
+/* Estilos visuais */
+.card, .card-stack, .card-place {
+    font-weight: bold;
+    font-size: 1.1em;
+    aspect-ratio: 2/3;
+    width: min(14vw, 120px);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    border-radius: 8px;
+}
+
+.card-place {
+    background: transparent;
+    box-shadow: none;
+    border: 2px dashed white;
+    color: white;
+    opacity: .6;
+}
+
+.card-stack {
+  background: #444;
+  color: white;
+}

@@ -1,0 +1,90 @@
+.home {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2em;
+    height: 100vh;
+}
+
+h1 {
+    font-size: 3em;
+}
+
+.bttn {
+    border-radius: 15px;
+    background-color: var(--bg2);
+    color: var(--text);
+    padding: .5em;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .1s ease-in;
+}
+
+.bttn:hover {
+    transform: scale(1.05);
+}
+
+.bttns-wrapper {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    justify-content: center;
+    width: 200px;
+}
+
+.bttns-wrapper > .bttn {
+    font-size: 1.2em;
+    width: 100%;
+}
+
+input {
+
+    border: none;
+}
+
+/* SVG */
+
+.svg-footer {
+    --size: 2rem;
+    height: var(--size);
+    width: var(--size);
+    cursor: pointer;
+}
+
+/* Footer */
+
+.home-footer {
+    position: fixed;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: end;
+    font-size: inherit;
+    gap: .75rem;
+    bottom: 20px;
+    right: 20px;
+    z-index: 400;
+}
+
+@media (max-width: 600px) {
+    .svg-footer {
+        --size: 1.5rem;
+    }
+}
+
+.home-footer > * {
+    opacity: 1;
+    transition: all .2s ease;
+}
+
+.home-footer a:hover, .home-footer button:hover {
+    opacity: 0.8;
+}
+
+.button-footer {
+    display: flex;
+}
