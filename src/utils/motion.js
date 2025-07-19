@@ -11,6 +11,7 @@ export const pageVariants = {
     opacity: 0,
     scale: 0.6 // Zoom out um pouco ao sair
   }
+
 }
 
 export const pageTransition = {

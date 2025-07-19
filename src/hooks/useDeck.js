@@ -5,19 +5,29 @@ export default function useBaralho() {
 
   // Gera o baralho sem as cartas restritas
   const gerarBaralho = useCallback(() => {
-    const naipes = ['Copas', 'Ouros', 'Paus', 'Espadas'];
-    const valores = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const suits = ['Copas', 'Ouros', 'Paus', 'Espadas'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const powerMap = {
+      A: 14,
+      J: 11,
+      Q: 12,
+      K: 13
+    }
 
     const novoBaralho = [];
 
-    for (const naipe of naipes) {
-      for (const valor of valores) {
-        const isFigura = ['A', 'J', 'Q', 'K'].includes(valor);
-        const isCopasOuOuros = naipe === 'Copas' || naipe === 'Ouros';
-        
-        if (isFigura && isCopasOuOuros) continue;
+    let id = 0
 
-        novoBaralho.push({ valor, naipe });
+    for (const suit of suits) {
+      for (const value of values) {
+        const isFigura = ['A', 'J', 'Q', 'K'].includes(value)
+        const isCopasOuOuros = suit === 'Copas' || suit === 'Ouros'
+        
+        if (isFigura && isCopasOuOuros) continue
+
+        const power = powerMap[value] || parseInt(value)
+
+        novoBaralho.push({ value, suit, power, id: id++ });
       }
     }
 

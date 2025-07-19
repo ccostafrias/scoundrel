@@ -3,7 +3,7 @@
 
 /*Reset & root*/
 html {
-    box-sizing: border-box;
+    box-sizing: content-box;
 }
 
 *, *:before, *:after {
@@ -13,6 +13,8 @@ html {
 }
 
 body {
+    --aspect: 3/4;
+    --card-asset: url('./assets/decks/set_1.png');
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -28,6 +30,7 @@ input, button {
 
 html {
     overflow: hidden;
+    --c2: rgb(166, 166, 166);
     --bg: #1e1e1e;
     --bg2: #3c3d3f;
     --bg3: #292929;
