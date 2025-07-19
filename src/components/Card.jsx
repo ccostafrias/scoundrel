@@ -30,6 +30,8 @@ export default function Game(props) {
         '--pad-y': actualDeck.padY,
     }
 
+    const bgImg = { backgroundImage: `url(${import.meta.env.BASE_URL}${actualDeck.src})` }
+
     return (
         <motion.div
             layoutId={`card-${card.id}`}
@@ -46,8 +48,8 @@ export default function Game(props) {
                 animate={flipAnimate}
                 transition={flipTransition}
             >
-                <div className='card-front'/>
-                <div className='card-back'/>
+                <div className='card-front' style={bgImg}/>
+                <div className='card-back' style={bgImg}/>
             </motion.div>
         </motion.div>
     )

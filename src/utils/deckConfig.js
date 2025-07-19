@@ -1,6 +1,6 @@
 export const deckConfig = {
     'set_1': {
-        src: './assets/decks/set_1.png',
+        src: 'assets/decks/set_1.png',
         width: 48,
         height: 64,
         cols: 15,
@@ -229,7 +229,7 @@ export const deckConfig = {
         ]
     },
     'set_2': {
-        src: './assets/decks/set_2.png',
+        src: 'assets/decks/set_2.png',
         width: 60,
         height: 92,
         cols: 27,
@@ -454,7 +454,7 @@ export const deckConfig = {
         ]
     },
     'set_3': {
-        src: './assets/decks/set_3.png',
+        src: 'assets/decks/set_3.png',
         width: 32,
         height: 48,
         cols: 20,
@@ -681,7 +681,7 @@ export const deckConfig = {
         ]
     },
     'set_4': {
-        src: './assets/decks/set_4.png',
+        src: 'assets/decks/set_4.png',
         width: 23,
         height: 34,
         cols: 15,
@@ -910,7 +910,7 @@ export const deckConfig = {
         ]
     },
     'set_5': {
-        src: './assets/decks/set_5.png',
+        src: 'assets/decks/set_5.png',
         width: 42,
         height: 60,
         cols: 14,

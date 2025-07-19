@@ -119,7 +119,6 @@
 }
 
 .card-back {
-  background: var(--card-asset);
   background-position:
     calc(
       (var(--back-c) * (var(--sprite-w) + var(--pad-x))) / (var(--img-w) - var(--sprite-w) - var(--pad-x)) * 100%
@@ -130,7 +129,6 @@
 }
 
 .card-front {
-  background: var(--card-asset);
   transform: rotateY(-180deg);
   background-position:
     calc(

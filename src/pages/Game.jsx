@@ -25,7 +25,6 @@ function Game() {
     useEffect(() => {
         if (actualDeck) {
             document.body.style.setProperty('--aspect', `${actualDeck.width}/${actualDeck.height}`);
-            document.body.style.setProperty('--card-asset', `url(${actualDeck.src})`);
         }
     }, [actualDeck])
 
