@@ -2,14 +2,14 @@
 .die-container {
     position: relative;
     aspect-ratio: 1/1;
-    width: 200px;
+    width: 150px;
     perspective: 800px;
 
     transition: transform .2s ease;
 }
 
 .die {
-  --s: 100px; /* LADO */
+  --s: 80px; /* LADO */
   --h: calc(var(--s)*0.866025); /* ALTURA TRIANGULO: h = l*sqrt(3)/2 */
   --a: calc(var(--s)/1.45308); /* APÓTEMA DO PENTÁGONO = l/2*tg(36deg)*/
   --r: calc(var(--s)/1.1755705) /* RAIO DO PENTÁGONO INSCRITO = l/2*sin(36deg) */
@@ -18,6 +18,7 @@
   --angle1: calc(90deg - 37.377368deg);
   --angle2: -10.8122deg;
   position: absolute;
+  font-size: calc(var(--s)/6);
 
   transform-style: preserve-3d;
   width: 100%;
@@ -39,7 +40,7 @@
     border-bottom: var(--h) solid var(--bg2);
 
     /* transform-style: preserve-3d; */
-    -webkit-backface-visibility: hidden;
+    /* -webkit-backface-visibility: hidden; */
     backface-visibility: hidden;
     counter-increment: steps 1;
 }

@@ -19,11 +19,12 @@ function Game() {
     const [xAngle, setXAngle] = useState([-180, 0])
     const [yAngle, setYAngle] = useState([-180, 0])
     const [zAngle, setZAngle] = useState([-180, 0])
-    const [face, setFace] = useState(20)
+    const [life, setLife] = useState(20)
     
     const [dungeonCards, setDungeonCards] = useState([])
     const [roomCards, setRoomCards] = useState([null, null, null, null])
     const [equippedWeapons, setEquippedWeapons] = useState([])
+    const [discardCards, setDiscardCards] = useState([])
 
     const [animacoesFinalizadas, setAnimacoesFinalizadas] = useState(0)
     const [animacaoConcluida, setAnimacaoConcluida] = useState(false)
@@ -58,7 +59,7 @@ function Game() {
     }, [animacoesFinalizadas, dungeonCards.length]);
 
     const handleRoomClick = (card) => {
-        const { value, suit } = card
+        const { value, suit, power } = card
         const removeRoomCard = () => {
             setRoomCards(prev =>
                 prev.map(c => {
@@ -67,6 +68,7 @@ function Game() {
                 })
             );
         }
+
         // Ouros = arma
         if (suit == 'Ouros') {
             removeRoomCard()
@@ -74,13 +76,23 @@ function Game() {
         }
         // Espadas/Paus = monstros
         if (suit == 'Paus' || suit == 'Espadas') {
-            if (equippedWeapons.length == 0) {
-                console.log('NUM DA')
-                return
-            }
+            const last = equippedWeapons.at(-1)
+            const weapon = equippedWeapons.at(0)
+
+            if (!weapon) return
+            if (last.suit != 'Ouros' && power >= last.power) return
             
+            const sub = Math.min(0, (weapon.power - power))
+
+            setLife(prev => Math.max(1, prev - sub))
             removeRoomCard()
-            setEquippedWeapons(prev => [...prev, card]);
+            setEquippedWeapons(prev => [...prev, card])
+        }
+
+        if (suit == 'Copas') {
+            setLife(prev => Math.min(20, prev + power))
+            removeRoomCard()
+            setDiscardCards(prev => [...prev, card])
         }
     }
 
@@ -183,7 +195,36 @@ function Game() {
                             })
                         }
                     </div>
-                    <div className="discard card-place"></div>
+                    <div className="discard card-place">
+                        {discardCards.length > 0 && (
+                            discardCards.map((card, i) => (
+                                <Card
+                                    key={card.id}
+                                    card={card}
+                                    initial={{
+                                        y: -i * .5,
+                                        x: 0,
+                                    }}
+                                    animate={false}
+                                    transition={{
+                                        duration: 0.5,
+                                        ease: 'easeOut',
+                                        // delay: i * 0.2    // Efeito de cascata
+                                    }}
+                                    flipInitial={{
+                                        rotateY: -180,
+                                    }}
+                                    flipAnimate={{
+                                        rotateY: 0,
+                                    }}
+                                    flipTransition={false}
+                                    actualDeck={actualDeck}
+                                    onAnimationComplete={() => {}}
+                                    onClick={() => {}}
+                                />
+                            ))
+                        )}
+                    </div>
                     <div className="equipped-weapon card-place">
                         {equippedWeapons.length > 0 && (
                             equippedWeapons.map((card, i) => (
@@ -213,41 +254,42 @@ function Game() {
                         )}
                     </div>
                     <div className='life-container'>
-                        <span className='life-text'>20</span>
                         <Die 
                             xAngle={xAngle}
                             yAngle={yAngle}
                             zAngle={zAngle}
-                            face={face}
+                            face={life}
                         />
-                        <input type="number" value={face} onChange={(e) => setFace(e.target.value)}/>
-                        <RangeSlider  
-                            min={-180} 
-                            max={180} 
-                            step={36}
-                            thumbsDisabled={[true, false]}
-                            rangeSlideDisabled={true}
-                            value={xAngle} 
-                            onInput={setXAngle} 
-                        />
-                        <RangeSlider  
-                            min={-180} 
-                            max={180} 
-                            step={18}
-                            thumbsDisabled={[true, false]}
-                            rangeSlideDisabled={true}
-                            value={yAngle} 
-                            onInput={setYAngle} 
-                        />
-                        <RangeSlider  
-                            min={-180} 
-                            max={180} 
-                            step={5}
-                            thumbsDisabled={[true, false]}
-                            rangeSlideDisabled={true}
-                            value={zAngle} 
-                            onInput={setZAngle} 
-                        />
+                        {/* <div>
+                            <input type="number" value={life} onChange={(e) => setLife(e.target.value)}/>
+                            <RangeSlider
+                                min={-180}
+                                max={180}
+                                step={36}
+                                thumbsDisabled={[true, false]}
+                                rangeSlideDisabled={true}
+                                value={xAngle}
+                                onInput={setXAngle}
+                            />
+                            <RangeSlider
+                                min={-180}
+                                max={180}
+                                step={18}
+                                thumbsDisabled={[true, false]}
+                                rangeSlideDisabled={true}
+                                value={yAngle}
+                                onInput={setYAngle}
+                            />
+                            <RangeSlider
+                                min={-180}
+                                max={180}
+                                step={5}
+                                thumbsDisabled={[true, false]}
+                                rangeSlideDisabled={true}
+                                value={zAngle}
+                                onInput={setZAngle}
+                            />
+                        </div> */}
                     </div>
                 </div>
             </motion.div>

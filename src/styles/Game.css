@@ -165,6 +165,7 @@
 }
 
 .life-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -179,10 +180,10 @@
   font-weight: bold;
 }
 
-.life-text::after {
+.life-container::after {
   position: absolute;
   content: 'Life';
-  top: var(--offset-y);
+  bottom: var(--offset-y);
 }
 
 .range-slider {
