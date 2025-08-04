@@ -163,3 +163,47 @@
   border: 2px dashed var(--c2);
   opacity: 1;
 }
+
+.life-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-row: 2;
+  grid-column: 1;
+}
+
+.life-text {
+  position: relative;
+  font-size: 3em;
+  font-weight: bold;
+}
+
+.life-text::after {
+  position: absolute;
+  content: 'Life';
+  top: var(--offset-y);
+}
+
+.range-slider {
+  margin-top: 1em;
+}
+
+.range-slider__thumb[data-lower] {
+    width: 0;
+}
+
+.range-slider__range {
+    border-radius: 6px;
+}
+
+input {
+  background-color: var(--bg2);
+  padding: .2em;
+  width: 100px;
+  border-radius: 5px;
+  border: 2px solid white;
+  color: white;
+  text-align: center;
+  font-size: 1.5em;
+}

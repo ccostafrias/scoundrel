@@ -22,9 +22,9 @@ body {
 }
 
 input, button {
-    appearance: none;
+    /* appearance: none;
     background: none;
-    border: none;
+    border: none; */
     cursor: pointer;
 }
 

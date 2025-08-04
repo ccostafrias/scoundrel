@@ -1,0 +1,209 @@
+
+.die-container {
+    position: relative;
+    aspect-ratio: 1/1;
+    width: 200px;
+    perspective: 800px;
+
+    transition: transform .2s ease;
+}
+
+.die {
+  --s: 100px; /* LADO */
+  --h: calc(var(--s)*0.866025); /* ALTURA TRIANGULO: h = l*sqrt(3)/2 */
+  --a: calc(var(--s)/1.45308); /* APÓTEMA DO PENTÁGONO = l/2*tg(36deg)*/
+  --r: calc(var(--s)/1.1755705) /* RAIO DO PENTÁGONO INSCRITO = l/2*sin(36deg) */
+  --d: calc(var(--a)+var(--r)); /* DIAGONAL = APÓTEMA + RAIO */
+  --h-fix: 0.982247;
+  --angle1: calc(90deg - 37.377368deg);
+  --angle2: -10.8122deg;
+  position: absolute;
+
+  transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+
+  transition: transform .2s ease;
+}
+
+.face {
+    --face: '1';
+    --text-angle: 0deg;
+    position: absolute;
+    left: calc(50% - var(--s) / 2);
+    top: calc(50% - var(--h) / 2);
+    width: 0;
+    height: 0;
+    border-left: calc(var(--s)/2) solid transparent;
+    border-right: calc(var(--s)/2) solid transparent;
+    border-bottom: var(--h) solid var(--bg2);
+
+    /* transform-style: preserve-3d; */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    counter-increment: steps 1;
+}
+
+.face::before {
+    content: var(--face);    
+    /* content: counter(steps); */
+    display: block;
+    transform: translate(-50%, -50%) rotate(var(--text-angle));
+    position: absolute;
+    top: calc(var(--h)* 2 / 3);
+    left: 0;
+    color: #fff;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.face-1 {
+    --face: '20';
+    --text-angle: 0deg;
+    transform: rotateY(0deg) rotateZ(0deg) translateZ(var(--a)) translateY(calc(var(--h) * -1 * var(--h-fix))) translateX(0px) rotateX(var(--angle1)); 
+    transform-origin: bottom;
+}
+
+.face-2 {
+    --face: '14';
+    --text-angle: 120deg;
+    transform: rotateY(72deg) rotateZ(0deg) translateZ(var(--a)) translateY(calc(var(--h) * -1 * var(--h-fix))) translateX(0px) rotateX(var(--angle1)); 
+    transform-origin: bottom;
+}
+
+.face-3 {
+    --face: '4';
+    --text-angle: 120deg;
+    transform: rotateY(144deg) rotateZ(0deg) translateZ(var(--a)) translateY(calc(var(--h) * -1 * var(--h-fix))) translateX(0px) rotateX(var(--angle1)); 
+    transform-origin: bottom;
+}
+
+.face-4 {
+    --face: '18';
+    --text-angle: 240deg;
+    transform: rotateY(216deg) rotateZ(0deg) translateZ(var(--a)) translateY(calc(var(--h) * -1 * var(--h-fix))) translateX(0px) rotateX(var(--angle1)); 
+    transform-origin: bottom;
+}
+
+.face-5 {
+    --face: '2';
+    --text-angle: -120deg;
+    transform: rotateY(288deg) rotateZ(0deg) translateZ(var(--a)) translateY(calc(var(--h) * -1 * var(--h-fix))) translateX(0px) rotateX(var(--angle1)); 
+    transform-origin: bottom;
+}
+
+.face-6 {
+    --face: '8';
+    --text-angle: 0deg;
+    transform: rotateY(0deg) rotateZ(180deg) translateZ(var(--a)) translateY(calc(var(--h) * var(--h-fix))) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-7 {
+    --face: '16';
+    --text-angle: 120deg;
+    transform: rotateY(36deg) rotateZ(0) translateZ(var(--a)) translateY(0px) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-8 {
+    --face: '6';
+    --text-angle: 0deg;
+    transform: rotateY(72deg) rotateZ(180deg) translateZ(var(--a)) translateY(calc(var(--h) * var(--h-fix))) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-8::after, .face-9::after {
+    content: '';
+    display: block;
+    width: 15px;
+    height: 3px;
+    background-color: white;
+    color: white;
+    font-size: 2em;
+    bottom: calc(var(--h) * -.92);
+}
+
+.face-9 {
+    --face: '9';
+    --text-angle: 0deg;
+    transform: rotateY(108deg) rotateZ(0) translateZ(var(--a)) translateY(0px) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-10 {
+    --face: '11';
+    --text-angle: 120deg;
+    transform: rotateY(144deg) rotateZ(180deg) translateZ(var(--a)) translateY(calc(var(--h) * var(--h-fix))) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-11 {
+    --face: '13';
+    --text-angle: 0deg;
+    transform: rotateY(180deg) rotateZ(0) translateZ(var(--a)) translateY(0px) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-12 {
+    --face: '5';
+    --text-angle: -120deg;
+    transform: rotateY(216deg) rotateZ(180deg) translateZ(var(--a)) translateY(calc(var(--h) * var(--h-fix))) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-13 {
+    --face: '15';
+    --text-angle: 0deg;
+    transform: rotateY(252deg) rotateZ(0) translateZ(var(--a)) translateY(0px) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-14 {
+    --face: '12';
+    --text-angle: 0deg;
+    transform: rotateY(288deg) rotateZ(180deg) translateZ(var(--a)) translateY(calc(var(--h) * var(--h-fix))) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-15 {
+    --face: '10';
+    --text-angle: -120deg;
+    transform: rotateY(324deg) rotateZ(0) translateZ(var(--a)) translateY(0px) translateX(0px) rotateX(var(--angle2)) ;
+    transform-origin: bottom;
+}
+
+.face-16 {
+    --face: '3';
+    --text-angle: 120deg;
+    transform: rotateY(36deg) rotateZ(180deg) translateZ(var(--a)) translateY(0) translateX(0px) rotateX(var(--angle1)) ; 
+    transform-origin: bottom;
+}
+
+.face-17 {
+    --face: '19';
+    --text-angle: 120deg;
+    transform: rotateY(108deg) rotateZ(180deg) translateZ(var(--a)) translateY(0) translateX(0px) rotateX(var(--angle1)) ; 
+    transform-origin: bottom;
+}
+
+.face-18 {
+    --face: '1';
+    --text-angle: 0deg;
+    transform: rotateY(180deg) rotateZ(180deg) translateZ(var(--a)) translateY(0) translateX(0px) rotateX(var(--angle1)) ; 
+    transform-origin: bottom;
+}
+
+.face-19 {
+    --face: '7';
+    --text-angle: -120deg;
+    transform: rotateY(252deg) rotateZ(180deg) translateZ(var(--a)) translateY(0) translateX(0px) rotateX(var(--angle1)) ; 
+    transform-origin: bottom;
+}
+
+.face-20 {
+    --face: '17';
+    --text-angle: -120deg;
+    transform: rotateY(324deg) rotateZ(180deg) translateZ(var(--a)) translateY(0) translateX(0px) rotateX(var(--angle1)) ; 
+    transform-origin: bottom;
+}

@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import RangeSlider from 'react-range-slider-input';
+import 'react-range-slider-input/dist/style.css';
+
 import { pageTransition, pageVariants } from "../utils/motion"
 import { deckConfig } from '../utils/deckConfig'
 import { fillRoomWithDungeonCards } from '../utils/cardsFunctions'
 import useDeck from '../hooks/useDeck'
 
 import Card from "../components/Card"
+import Die from '../components/Die';
 
 import "../styles/Game.css"
 
 function Game() {
     const [baralho, embaralhar] = useDeck()
+
+    const [xAngle, setXAngle] = useState([-180, 0])
+    const [yAngle, setYAngle] = useState([-180, 0])
+    const [zAngle, setZAngle] = useState([-180, 0])
+    const [face, setFace] = useState(20)
     
     const [dungeonCards, setDungeonCards] = useState([])
     const [roomCards, setRoomCards] = useState([null, null, null, null])
@@ -202,6 +211,43 @@ function Game() {
                                 />
                             ))
                         )}
+                    </div>
+                    <div className='life-container'>
+                        <span className='life-text'>20</span>
+                        <Die 
+                            xAngle={xAngle}
+                            yAngle={yAngle}
+                            zAngle={zAngle}
+                            face={face}
+                        />
+                        <input type="number" value={face} onChange={(e) => setFace(e.target.value)}/>
+                        <RangeSlider  
+                            min={-180} 
+                            max={180} 
+                            step={36}
+                            thumbsDisabled={[true, false]}
+                            rangeSlideDisabled={true}
+                            value={xAngle} 
+                            onInput={setXAngle} 
+                        />
+                        <RangeSlider  
+                            min={-180} 
+                            max={180} 
+                            step={18}
+                            thumbsDisabled={[true, false]}
+                            rangeSlideDisabled={true}
+                            value={yAngle} 
+                            onInput={setYAngle} 
+                        />
+                        <RangeSlider  
+                            min={-180} 
+                            max={180} 
+                            step={5}
+                            thumbsDisabled={[true, false]}
+                            rangeSlideDisabled={true}
+                            value={zAngle} 
+                            onInput={setZAngle} 
+                        />
                     </div>
                 </div>
             </motion.div>
