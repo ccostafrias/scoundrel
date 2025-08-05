@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'; 
 import { motion, AnimatePresence } from 'framer-motion'
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
@@ -9,12 +10,14 @@ import { deckConfig } from '../utils/deckConfig'
 import useDeck from '../hooks/useDeck'
 import useGameState from '../hooks/useGameState';
 
+import CustomModal from '../components/CustomModal'
 import Card from "../components/Card"
 import Die from '../components/Die';
 
 import "../styles/Game.css"
 
 function Game() {
+    const navigate = useNavigate()
     const [baralho, embaralhar] = useDeck()
 
     const {
@@ -30,6 +33,7 @@ function Game() {
         setGameOver,
     } = useGameState(20);
     
+    const [modalOpen, setModalOpen] = useState(false)
     const [dungeonCards, setDungeonCards] = useState([])
     const [roomCards, setRoomCards] = useState([null, null, null, null])
     const [equippedWeapons, setEquippedWeapons] = useState([])
@@ -51,6 +55,7 @@ function Game() {
     useEffect(() => {
         if (roomCards.every(card => !card) && dungeonCards.length >= 4 && dungeonCards.every(card => !card.isInitial)) {
             fillRoom()
+            nextRound()
         }
     }, [dungeonCards, roomCards])
 
@@ -66,22 +71,16 @@ function Game() {
         const actualRoomCards = roomCards
 
         setRoomCards([null, null, null, null])
-
         setDungeonCards(prevDungeon => {
             const newDungeon = [...actualRoomCards, ...prevDungeon]
             return newDungeon;
-        });
-
-        // setTimeout(() => {
-        //     setRoomCards([null, null, null, null]) // limpa as roomCards
-
-        // }, 2000)
-        
+        })        
     }, [roundSkipped])
 
     useEffect(() => {
         if (gameOver) {
-            console.log('PERDEU')
+            console.log('Game Over')
+            setModalOpen(true)
         }
     }, [gameOver])
 
@@ -130,8 +129,7 @@ function Game() {
         }
     }
 
-    const handleDungeonClick = (card) => {
-        console.log(animacoesFinalizadas, baralho)
+    const handleDungeonClick = () => {
         if (animacoesFinalizadas != baralho.length) return
         if (fillRoom(3)) {
             nextRound()
@@ -160,6 +158,37 @@ function Game() {
 
     return (
         <>
+            <CustomModal
+                isOpen={modalOpen}
+                onRequestClose={null}
+                onAfterClose={() => setGameOver(false)}
+                title={gameOver ? 'Game Over!' : 'Victory!'}
+                footer={
+                    <>
+                        <button className='modal-bttn' onClick={() => {setModalOpen(false); embaralhar()}}>Restart</button>
+                        <button className='modal-bttn' onClick={() => {setModalOpen(false); navigate('/')}}>Menu</button>
+                    </>
+                }
+                shouldClose={false}
+            >
+                <>
+                    <span>Score: </span>
+                    <ul className='game-over-stats--container'>
+                        <li className='game-over-stats'>
+                            <span>Life:</span>
+                            <span className="game-over-stats--value">{life}</span>
+                        </li>
+                        <li className='game-over-stats'>
+                            <span>Monsters left: </span>
+                            <span className="game-over-stats--value">- {dungeonCards.reduce((acc, curr) => acc + (curr.suit == 'Paus' || curr.suit == 'Espadas' ? curr.power : 0), 0)}</span>
+                        </li>
+                        <li className='game-over-stats'>
+                            <span>Total</span>
+                            <span className='game-over-stats--total game-over-stats--value'>{life - dungeonCards.reduce((acc, curr) => acc + (curr.suit == 'Paus' || curr.suit == 'Espadas' ? curr.power : 0), 0)}</span>
+                        </li>
+                    </ul>
+                </>
+            </CustomModal>
              <motion.div 
                 className="main-game"
                 variants={pageVariants}
@@ -302,11 +331,17 @@ function Game() {
                     </div>
                     <div className='life-container'>
                         <Die 
-                            face={life}
+                            face={life > 0 ? life : 1}
                         />
                     </div>
                     <div className='skip-container'>
-                        <button className='skip-bttn' onClick={skipRound} disabled={(animacoesFinalizadas !== dungeonCards.length + 4 || round != 1) && roundSkipped == round - 1} >Avoid</button>
+                        <button 
+                            className='skip-bttn' 
+                            onClick={skipRound}
+                            disabled={roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4}
+                        >
+                            Avoid
+                        </button>
                     </div>
                 </div>
             </motion.div>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 export default function useGameState(initialLife = 20) {
   const [life, setLife] = useState(initialLife)
   const [hasPotted, setHasPotted] = useState(false)
-  const [round, setRound] = useState(1)
+  const [round, setRound] = useState(0)
   const [roundSkipped, setRoundSkipped] = useState(0)
   const [gameOver, setGameOver] = useState(false)
 
@@ -16,7 +16,6 @@ export default function useGameState(initialLife = 20) {
   const skipRound = () => {
     if (round != 1 && round == roundSkipped + 1) return
     setRoundSkipped(round)
-    nextRound()
   }
 
   const takePotion = (amount) => {
@@ -29,7 +28,7 @@ export default function useGameState(initialLife = 20) {
   const takeDamage = (amount) => {
     const lifeAfterDamage = life - amount
     if (lifeAfterDamage <= 0) setGameOver(true)
-    setLife(Math.max(lifeAfterDamage, 1))
+    setLife(lifeAfterDamage)
   }
 
   return {

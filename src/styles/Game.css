@@ -9,6 +9,7 @@
 
 .board {
   --offset-y: -1.3em;
+  box-sizing: content-box;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: auto auto;
