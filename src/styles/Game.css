@@ -8,7 +8,7 @@
 }
 
 .board {
-  --offset-y: -30px;
+  --offset-y: -1.3em;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: auto auto;
@@ -24,7 +24,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.2em;
   white-space: nowrap;
 }
 
@@ -78,6 +78,33 @@
   grid-column: 2;
   grid-row: 3;
   text-align: center;
+}
+
+.skip-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.skip-bttn {
+  border-radius: 5px;
+  background-color: var(--c2);
+  border: 4px solid var(--c4);
+  padding: .3em .5em;
+  font-size: 1.5em;
+  font-weight: bold;
+  transition: filter .2s linear;
+}
+
+.skip-bttn:disabled {
+  opacity: .8;
+  cursor: not-allowed;
+}
+
+.skip-bttn:enabled:hover {
+  filter: brightness(1.2);
 }
 
 /* Estilos visuais */
@@ -160,11 +187,13 @@
   position: relative;
   background: transparent;
   box-shadow: none;
-  border: 2px dashed var(--c2);
+  border: 2px dashed var(--c4);
   opacity: 1;
 }
 
 .life-container {
+  justify-self: center;
+  align-self: center;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -199,7 +228,7 @@
 }
 
 input {
-  background-color: var(--bg2);
+  background-color: var(--c2);
   padding: .2em;
   width: 100px;
   border-radius: 5px;

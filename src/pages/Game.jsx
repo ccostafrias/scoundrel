@@ -5,8 +5,9 @@ import 'react-range-slider-input/dist/style.css';
 
 import { pageTransition, pageVariants } from "../utils/motion"
 import { deckConfig } from '../utils/deckConfig'
-import { fillRoomWithDungeonCards } from '../utils/cardsFunctions'
+
 import useDeck from '../hooks/useDeck'
+import useGameState from '../hooks/useGameState';
 
 import Card from "../components/Card"
 import Die from '../components/Die';
@@ -16,10 +17,18 @@ import "../styles/Game.css"
 function Game() {
     const [baralho, embaralhar] = useDeck()
 
-    const [xAngle, setXAngle] = useState([-180, 0])
-    const [yAngle, setYAngle] = useState([-180, 0])
-    const [zAngle, setZAngle] = useState([-180, 0])
-    const [life, setLife] = useState(20)
+    const {
+        life,
+        hasPotted,
+        round,
+        roundSkipped,
+        gameOver,
+        takePotion,
+        takeDamage,
+        nextRound,
+        skipRound,
+        setGameOver,
+    } = useGameState(20);
     
     const [dungeonCards, setDungeonCards] = useState([])
     const [roomCards, setRoomCards] = useState([null, null, null, null])
@@ -27,36 +36,54 @@ function Game() {
     const [discardCards, setDiscardCards] = useState([])
 
     const [animacoesFinalizadas, setAnimacoesFinalizadas] = useState(0)
-    const [animacaoConcluida, setAnimacaoConcluida] = useState(false)
 
     const actualDeckName = 'set_3'
     const actualDeck = deckConfig[actualDeckName] || null
 
     useEffect(() => {
-        if (actualDeck) {
-            document.body.style.setProperty('--aspect', `${actualDeck.width}/${actualDeck.height}`);
-        }
+        if (actualDeck) document.body.style.setProperty('--aspect', `${actualDeck.width}/${actualDeck.height}`);
     }, [actualDeck])
 
     useEffect(() => {
-        if (baralho.length > 0) {
-            setDungeonCards([...baralho])
-        }
-
+        if (baralho.length > 0) setDungeonCards([...baralho.map(card => ({...card, isInitial: true}))])
     }, [baralho])
 
     useEffect(() => {
-        if (animacaoConcluida && dungeonCards.length >= 4) {
+        if (roomCards.every(card => !card) && dungeonCards.length >= 4 && dungeonCards.every(card => !card.isInitial)) {
             fillRoom()
-            setAnimacaoConcluida(false)
         }
-    }, [animacaoConcluida, dungeonCards]);
+    }, [dungeonCards, roomCards])
 
     useEffect(() => {
-        if (animacoesFinalizadas === dungeonCards.length && animacoesFinalizadas != 0) {
-            setAnimacaoConcluida(true);
+        if (animacoesFinalizadas === 44) {
+            setDungeonCards(prev => [...prev.map(card => ({...card, isInitial: false}))])
         }
-    }, [animacoesFinalizadas, dungeonCards.length]);
+    }, [animacoesFinalizadas])
+
+    useEffect(() => {
+        if (roundSkipped == 0) return
+
+        const actualRoomCards = roomCards
+
+        setRoomCards([null, null, null, null])
+
+        setDungeonCards(prevDungeon => {
+            const newDungeon = [...actualRoomCards, ...prevDungeon]
+            return newDungeon;
+        });
+
+        // setTimeout(() => {
+        //     setRoomCards([null, null, null, null]) // limpa as roomCards
+
+        // }, 2000)
+        
+    }, [roundSkipped])
+
+    useEffect(() => {
+        if (gameOver) {
+            console.log('PERDEU')
+        }
+    }, [gameOver])
 
     const handleRoomClick = (card) => {
         const { value, suit, power } = card
@@ -66,39 +93,49 @@ function Game() {
                     if (c && c.value === card.value && c.suit === card.suit) return null
                     else return c
                 })
-            );
+            )
         }
 
         // Ouros = arma
         if (suit == 'Ouros') {
             removeRoomCard()
-            setEquippedWeapons(prev => [...prev, card])
+            const actualWeaponsCards = equippedWeapons
+            setEquippedWeapons([card])
+            setDiscardCards(prev => [...prev, ...actualWeaponsCards])
         }
         // Espadas/Paus = monstros
         if (suit == 'Paus' || suit == 'Espadas') {
             const last = equippedWeapons.at(-1)
-            const weapon = equippedWeapons.at(0)
-
-            if (!weapon) return
-            if (last.suit != 'Ouros' && power >= last.power) return
+            const weapon = equippedWeapons[0]?.suit == 'Ouros' ? equippedWeapons[0] : {power: 0}
+            let sub
             
-            const sub = Math.min(0, (weapon.power - power))
-
-            setLife(prev => Math.max(1, prev - sub))
+            if ((last && (last.suit == 'Espadas' || last.suit == 'Paus') && power >= last.power) || weapon.power == 0) {
+                sub = card.power
+                setDiscardCards(prev => [...prev, card])
+            } else {
+                sub = Math.max(0, (power - weapon.power))
+                setEquippedWeapons(prev => [...prev, card])
+            }
+            
             removeRoomCard()
-            setEquippedWeapons(prev => [...prev, card])
+            takeDamage(sub)
         }
 
         if (suit == 'Copas') {
-            setLife(prev => Math.min(20, prev + power))
+            if (!hasPotted) {
+                takePotion(power)
+            }
             removeRoomCard()
             setDiscardCards(prev => [...prev, card])
         }
     }
 
     const handleDungeonClick = (card) => {
+        console.log(animacoesFinalizadas, baralho)
         if (animacoesFinalizadas != baralho.length) return
-        fillRoom(3)
+        if (fillRoom(3)) {
+            nextRound()
+        }
     }
 
     function fillRoom (n = 1) {
@@ -116,7 +153,9 @@ function Game() {
             })
 
             setDungeonCards(prev => prev.slice(0, -empties));
-        }
+
+            return true
+        } else return null
     }
 
     return (
@@ -135,11 +174,11 @@ function Game() {
                             <Card
                                 key={card.id}
                                 card={card}
-                                initial={{
+                                initial={card.isInitial ? {
                                     y: window.innerHeight,
                                     x: -window.innerWidth,
                                     rotate: -10,
-                                }}
+                                } : false}
                                 animate={{
                                     y: -i * .5,
                                     x: 0,
@@ -150,8 +189,16 @@ function Game() {
                                     ease: 'easeOut',
                                     delay: i * 0.05    // Efeito de cascata
                                 }}
+                                flipInitial={!card.isInitial ? {
+                                    rotateY: -180,
+                                } : null}
+                                flipAnimate={!card.isInitial ? {
+                                    rotateY: 0,
+                                } : null}
+                                flipTransition={false}
                                 actualDeck={actualDeck}
                                 onAnimationComplete={() => {
+                                    if (!card.isInitial) return
                                     setAnimacoesFinalizadas(prev => prev + 1)
                                 }}
                                 onClick={() => handleDungeonClick(card)}
@@ -201,11 +248,11 @@ function Game() {
                                 <Card
                                     key={card.id}
                                     card={card}
-                                    initial={{
+                                    initial={false}
+                                    animate={{
                                         y: -i * .5,
                                         x: 0,
                                     }}
-                                    animate={false}
                                     transition={{
                                         duration: 0.5,
                                         ease: 'easeOut',
@@ -255,41 +302,11 @@ function Game() {
                     </div>
                     <div className='life-container'>
                         <Die 
-                            xAngle={xAngle}
-                            yAngle={yAngle}
-                            zAngle={zAngle}
                             face={life}
                         />
-                        {/* <div>
-                            <input type="number" value={life} onChange={(e) => setLife(e.target.value)}/>
-                            <RangeSlider
-                                min={-180}
-                                max={180}
-                                step={36}
-                                thumbsDisabled={[true, false]}
-                                rangeSlideDisabled={true}
-                                value={xAngle}
-                                onInput={setXAngle}
-                            />
-                            <RangeSlider
-                                min={-180}
-                                max={180}
-                                step={18}
-                                thumbsDisabled={[true, false]}
-                                rangeSlideDisabled={true}
-                                value={yAngle}
-                                onInput={setYAngle}
-                            />
-                            <RangeSlider
-                                min={-180}
-                                max={180}
-                                step={5}
-                                thumbsDisabled={[true, false]}
-                                rangeSlideDisabled={true}
-                                value={zAngle}
-                                onInput={setZAngle}
-                            />
-                        </div> */}
+                    </div>
+                    <div className='skip-container'>
+                        <button className='skip-bttn' onClick={skipRound} disabled={(animacoesFinalizadas !== dungeonCards.length + 4 || round != 1) && roundSkipped == round - 1} >Avoid</button>
                     </div>
                 </div>
             </motion.div>

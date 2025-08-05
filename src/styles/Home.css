@@ -13,7 +13,7 @@ h1 {
 
 .bttn {
     border-radius: 15px;
-    background-color: var(--bg2);
+    background-color: var(--c2);
     color: var(--text);
     padding: .5em;
     font-size: 1rem;

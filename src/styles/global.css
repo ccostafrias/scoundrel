@@ -3,6 +3,7 @@
 
 /*Reset & root*/
 html {
+    font-weight: normal;
     box-sizing: content-box;
 }
 
@@ -22,18 +23,18 @@ body {
 }
 
 input, button {
-    /* appearance: none;
+    appearance: none;
     background: none;
-    border: none; */
+    border: none;
     cursor: pointer;
 }
 
 html {
     overflow: hidden;
-    --c2: rgb(166, 166, 166);
-    --bg: #1e1e1e;
-    --bg2: #3c3d3f;
-    --bg3: #292929;
+    --c1: #1e1e1e;
+    --c2: #3c3d3f;
+    --c3: #292929;
+    --c4: rgb(166, 166, 166);
     --text: #abb2bf;
 }
 
@@ -50,7 +51,7 @@ body, button, input, textarea, a {
 }
 
 html, body {
-    background: var(--bg);
-    font-size: 18px;
+    background: var(--c1);
+    font-size: 1.2rem;
     line-height: 1;
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import '../styles/Die.css'
 
 const ANGLE1 = 37.377368
@@ -130,42 +130,76 @@ const angles = {
 
 export default function Die(props) {
     const {
-        xAngle,
-        yAngle,
-        zAngle,
         face,
     } = props
+    
+    const [xAngle, setXAngle] = useState([-180, 0])
+    const [yAngle, setYAngle] = useState([-180, 0])
+    const [zAngle, setZAngle] = useState([-180, 0])
 
     const {x, y, z, r} = angles[face] || {x: xAngle[1], y: yAngle[1], z: zAngle[1], r: 0}
 
+
     return (
-        <div className='die-container' style={{
-            transform: `rotate(${r}deg)`
-        }}>
-            <div className="die" style={{
-                transform: `translateZ(calc(var(--a)*-1)) rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg) `
+        <div>
+            <div className='die-container' style={{
+                transform: `rotate(${r}deg)`
             }}>
-                <div className="face face-1"></div>
-                <div className="face face-2"></div>
-                <div className="face face-3"></div>
-                <div className="face face-4"></div>
-                <div className="face face-5"></div>
-                <div className="face face-6"></div>
-                <div className="face face-7"></div>
-                <div className="face face-8"></div>
-                <div className="face face-9"></div>
-                <div className="face face-10"></div>
-                <div className="face face-11"></div>
-                <div className="face face-12"></div>
-                <div className="face face-13"></div>
-                <div className="face face-14"></div>
-                <div className="face face-15"></div>
-                <div className="face face-16"></div>
-                <div className="face face-17"></div>
-                <div className="face face-18"></div>
-                <div className="face face-19"></div>
-                <div className="face face-20"></div>
+                <div className="die" style={{
+                    transform: `translateZ(calc(var(--a)*-1)) rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg) `
+                }}>
+                    <div className="face face-1"></div>
+                    <div className="face face-2"></div>
+                    <div className="face face-3"></div>
+                    <div className="face face-4"></div>
+                    <div className="face face-5"></div>
+                    <div className="face face-6"></div>
+                    <div className="face face-7"></div>
+                    <div className="face face-8"></div>
+                    <div className="face face-9"></div>
+                    <div className="face face-10"></div>
+                    <div className="face face-11"></div>
+                    <div className="face face-12"></div>
+                    <div className="face face-13"></div>
+                    <div className="face face-14"></div>
+                    <div className="face face-15"></div>
+                    <div className="face face-16"></div>
+                    <div className="face face-17"></div>
+                    <div className="face face-18"></div>
+                    <div className="face face-19"></div>
+                    <div className="face face-20"></div>
+                </div>
             </div>
+            {/* <div>
+                <input type="number" value={life} onChange={(e) => setLife(e.target.value)}/>
+                <RangeSlider
+                    min={-180}
+                    max={180}
+                    step={36}
+                    thumbsDisabled={[true, false]}
+                    rangeSlideDisabled={true}
+                    value={xAngle}
+                    onInput={setXAngle}
+                />
+                <RangeSlider
+                    min={-180}
+                    max={180}
+                    step={18}
+                    thumbsDisabled={[true, false]}
+                    rangeSlideDisabled={true}
+                    value={yAngle}
+                    onInput={setYAngle}
+                />
+                <RangeSlider
+                    min={-180}
+                    max={180}
+                    step={5}
+                    thumbsDisabled={[true, false]}
+                    rangeSlideDisabled={true}
+                    value={zAngle}
+                    onInput={setZAngle}
+                />
+            </div> */}
         </div>
     )
 }

@@ -1,5 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+
 :root {
-    --font-main: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    --font-main: "Pixelify Sans", sans-serif;
+    /* --font-main: "Jersey 15", sans-serif; */
+    --font-sec: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
     --cell-size: 50px;
     --trans-time: .5s;
