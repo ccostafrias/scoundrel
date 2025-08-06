@@ -1,0 +1,14 @@
+.mouse-tracker {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-color: var(--c2);
+  padding: .5em;
+  border-radius: 5px;
+  white-space: nowrap;
+  transform-origin: top left;
+  /* visibility: hidden; */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'; 
 import { motion, AnimatePresence } from 'framer-motion'
-import RangeSlider from 'react-range-slider-input'
-import 'react-range-slider-input/dist/style.css'
 
 import { pageTransition, pageVariants } from "../utils/motion"
 import { deckConfig } from '../utils/deckConfig'
@@ -12,6 +10,7 @@ import useGameState from '../hooks/useGameState'
 
 import CustomModal from '../components/CustomModal'
 import ModalContent from '../components/ModalContent'
+import MouseTracker from '../components/MouseTracker'
 import Card from "../components/Card"
 import Die from '../components/Die'
 
@@ -35,12 +34,13 @@ function Game() {
         resetGame,
     } = useGameState(20);
     
-    const [modalOpen, setModalOpen] = useState(false)
     const [dungeonCards, setDungeonCards] = useState([])
     const [roomCards, setRoomCards] = useState([null, null, null, null])
     const [equippedWeapons, setEquippedWeapons] = useState([])
     const [discardCards, setDiscardCards] = useState([])
-
+    
+    const [target, setTarget] = useState(null)
+    const [modalOpen, setModalOpen] = useState(false)
     const [animacoesFinalizadas, setAnimacoesFinalizadas] = useState(0)
 
     const actualDeckName = 'set_3'
@@ -172,8 +172,22 @@ function Game() {
         setAnimacoesFinalizadas(0)
     }
 
+    useEffect(() => {
+        // console.log('Target changed:', target)
+    }, [target])
+
     return (
         <>
+            <AnimatePresence>
+                {target && (
+                    <MouseTracker
+                        initial={{ x: target.x, y: target.y }}
+                        offset={{ x: 10, y: 10 }}
+                    >
+                        <span>Opa</span>
+                    </MouseTracker>
+                )}
+            </AnimatePresence>
             <CustomModal
                 isOpen={modalOpen}
                 onRequestClose={null}
@@ -272,6 +286,12 @@ function Game() {
                                                 actualDeck={actualDeck}
                                                 onAnimationComplete={() => {}}
                                                 onClick={() => handleRoomClick(roomCards[i])}
+                                                handleMouseEnter={(e) => setTarget({
+                                                    card: roomCards[i],
+                                                    x: e.pageX,
+                                                    y: e.pageY,
+                                                })}
+                                                handleMouseLeave={() => setTarget(null)}
                                             />
                                         )}
                                     </div>

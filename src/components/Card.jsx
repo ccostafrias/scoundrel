@@ -14,6 +14,8 @@ export default function Game(props) {
         actualDeck,
         onAnimationComplete,
         onClick,
+        handleMouseEnter,
+        handleMouseLeave,
     } = props
 
     const [r, c] = card ? findCard(actualDeck.order, card) : []
@@ -42,6 +44,8 @@ export default function Game(props) {
             onAnimationComplete={onAnimationComplete}
             style={style}
             onClick={onClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             <motion.div className='flip'
                 initial={flipInitial}
