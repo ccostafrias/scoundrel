@@ -23,7 +23,7 @@ export default function Home() {
             <h1>Scoundrel</h1>
             <div className='bttns-wrapper'>
                 <button className='bttn' onClick={() => window.open('http://stfj.net/art/2011/Scoundrel.pdf')}>RULES</button>
-                <button className='bttn' onClick={startGame}>Jogar</button>
+                <button className='bttn' onClick={startGame}>Play</button>
             </div>
         </main>
     </motion.div>

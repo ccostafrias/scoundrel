@@ -2,7 +2,7 @@
 
 :root {
     --font-main: "Pixelify Sans", sans-serif;
-    /* --font-main: "Jersey 15", sans-serif; */
+    --font-terc: "Jersey 15", sans-serif;
     --font-sec: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
     --cell-size: 50px;

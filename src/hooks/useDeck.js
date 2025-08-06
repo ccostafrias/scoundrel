@@ -6,7 +6,9 @@ export default function useBaralho() {
   // Gera o baralho sem as cartas restritas
   const gerarBaralho = useCallback(() => {
     const suits = ['Copas', 'Ouros', 'Paus', 'Espadas'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+    // const values = ['2', '3', '4']
+    // const values = ['A', 'J', 'Q', 'K']
     const powerMap = {
       A: 14,
       J: 11,
@@ -51,10 +53,5 @@ export default function useBaralho() {
     setBaralho(embaralhado);
   }, [gerarBaralho, embaralharCartas]);
 
-  // Função exposta para embaralhar de novo
-  const embaralhar = () => {
-    setBaralho((prev) => embaralharCartas(prev));
-  };
-
-  return [baralho, embaralhar];
+  return [baralho, embaralharCartas];
 }

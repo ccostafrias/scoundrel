@@ -1,10 +1,10 @@
 
 .die-container {
     --s: 100px; /* LADO */
-    --h: calc(var(--s)*0.866025); /* ALTURA TRIANGULO: h = l*sqrt(3)/2 */
-    --a: calc(var(--s)/1.45308); /* APÓTEMA DO PENTÁGONO = l/2*tg(36deg)*/
-    --r: calc(var(--s)/1.1755705) /* RAIO DO PENTÁGONO INSCRITO = l/2*sin(36deg) */
-    --d: calc(var(--a)+var(--r)); /* DIAGONAL = APÓTEMA + RAIO */
+    --h: calc(var(--s) * 0.866025); /* ALTURA TRIANGULO: h = l*sqrt(3)/2 */
+    --a: calc(var(--s) / 1.45308); /* APÓTEMA DO PENTÁGONO = l/2*tg(36deg)*/
+    --r: calc(var(--s) / 1.1755705) /* RAIO DO PENTÁGONO INSCRITO = l/2*sin(36deg) */
+    --d: calc(var(--a) + var(--r)); /* DIAGONAL = APÓTEMA + RAIO */
     --h-fix: 0.982247;
     --angle1: calc(90deg - 37.377368deg);
     --angle2: -10.8122deg;
@@ -20,7 +20,7 @@
 
 .die {
   position: absolute;
-  font-size: calc(var(--s)/6);
+  font-size: calc(var(--s) / 6);
 
   transform-style: preserve-3d;
   width: 100%;
@@ -37,8 +37,8 @@
     top: calc(50% - var(--h) / 2);
     width: 0;
     height: 0;
-    border-left: calc(var(--s)/2) solid transparent;
-    border-right: calc(var(--s)/2) solid transparent;
+    border-left: calc(var(--s) / 2) solid transparent;
+    border-right: calc(var(--s) / 2) solid transparent;
     border-bottom: var(--h) solid var(--c2);
 
     /* transform-style: preserve-3d; */

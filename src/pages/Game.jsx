@@ -1,36 +1,38 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'; 
 import { motion, AnimatePresence } from 'framer-motion'
-import RangeSlider from 'react-range-slider-input';
-import 'react-range-slider-input/dist/style.css';
+import RangeSlider from 'react-range-slider-input'
+import 'react-range-slider-input/dist/style.css'
 
 import { pageTransition, pageVariants } from "../utils/motion"
 import { deckConfig } from '../utils/deckConfig'
 
 import useDeck from '../hooks/useDeck'
-import useGameState from '../hooks/useGameState';
+import useGameState from '../hooks/useGameState'
 
 import CustomModal from '../components/CustomModal'
+import ModalContent from '../components/ModalContent'
 import Card from "../components/Card"
-import Die from '../components/Die';
+import Die from '../components/Die'
 
 import "../styles/Game.css"
 
 function Game() {
     const navigate = useNavigate()
-    const [baralho, embaralhar] = useDeck()
+    const [baralho, embaralharCartas] = useDeck()
 
     const {
         life,
         hasPotted,
         round,
         roundSkipped,
-        gameOver,
+        gameState,
         takePotion,
         takeDamage,
         nextRound,
         skipRound,
-        setGameOver,
+        setGameState,
+        resetGame,
     } = useGameState(20);
     
     const [modalOpen, setModalOpen] = useState(false)
@@ -53,14 +55,20 @@ function Game() {
     }, [baralho])
 
     useEffect(() => {
-        if (roomCards.every(card => !card) && dungeonCards.length >= 4 && dungeonCards.every(card => !card.isInitial)) {
+        if (dungeonCards.some(card => card.isInitial)) return
+
+        const allRoomEmpty = roomCards.every(card => !card)
+
+        if (allRoomEmpty && dungeonCards.length > 0) {
             fillRoom()
             nextRound()
+        } else if (animacoesFinalizadas > 0 && dungeonCards.length == 0 && allRoomEmpty) {
+            setGameState('win')
         }
     }, [dungeonCards, roomCards])
 
     useEffect(() => {
-        if (animacoesFinalizadas === 44) {
+        if (animacoesFinalizadas === baralho.length && baralho.length > 0) {
             setDungeonCards(prev => [...prev.map(card => ({...card, isInitial: false}))])
         }
     }, [animacoesFinalizadas])
@@ -78,11 +86,10 @@ function Game() {
     }, [roundSkipped])
 
     useEffect(() => {
-        if (gameOver) {
-            console.log('Game Over')
+        if (gameState == 'gameOver' || gameState == 'win') {
             setModalOpen(true)
         }
-    }, [gameOver])
+    }, [gameState])
 
     const handleRoomClick = (card) => {
         const { value, suit, power } = card
@@ -156,16 +163,25 @@ function Game() {
         } else return null
     }
 
+    function handleReset() {
+        resetGame()
+        setRoomCards([null, null, null, null])
+        setDiscardCards([])
+        setEquippedWeapons([])
+        setDungeonCards([...embaralharCartas(baralho)])
+        setAnimacoesFinalizadas(0)
+    }
+
     return (
         <>
             <CustomModal
                 isOpen={modalOpen}
                 onRequestClose={null}
-                onAfterClose={() => setGameOver(false)}
-                title={gameOver ? 'Game Over!' : 'Victory!'}
+                onAfterClose={handleReset}
+                title={gameState == 'gameOver' ? 'Game Over!' : 'Victory!'}
                 footer={
                     <>
-                        <button className='modal-bttn' onClick={() => {setModalOpen(false); embaralhar()}}>Restart</button>
+                        <button className='modal-bttn' onClick={() => {setModalOpen(false)}}>Restart</button>
                         <button className='modal-bttn' onClick={() => {setModalOpen(false); navigate('/')}}>Menu</button>
                     </>
                 }
@@ -173,20 +189,12 @@ function Game() {
             >
                 <>
                     <span>Score: </span>
-                    <ul className='game-over-stats--container'>
-                        <li className='game-over-stats'>
-                            <span>Life:</span>
-                            <span className="game-over-stats--value">{life}</span>
-                        </li>
-                        <li className='game-over-stats'>
-                            <span>Monsters left: </span>
-                            <span className="game-over-stats--value">- {dungeonCards.reduce((acc, curr) => acc + (curr.suit == 'Paus' || curr.suit == 'Espadas' ? curr.power : 0), 0)}</span>
-                        </li>
-                        <li className='game-over-stats'>
-                            <span>Total</span>
-                            <span className='game-over-stats--total game-over-stats--value'>{life - dungeonCards.reduce((acc, curr) => acc + (curr.suit == 'Paus' || curr.suit == 'Espadas' ? curr.power : 0), 0)}</span>
-                        </li>
-                    </ul>
+                    <ModalContent 
+                        dungeonCards={dungeonCards}
+                        discardCards={discardCards}
+                        life={life}
+                        gameState={gameState}
+                    />
                 </>
             </CustomModal>
              <motion.div 
