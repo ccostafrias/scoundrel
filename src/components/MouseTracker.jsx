@@ -9,8 +9,6 @@ export default function MouseTracker({ children, offset = { x: 0, y: 0}, initial
     const y = useMotionValue(initial.y);
 
     useEffect(() => {
-        console.log(x, y)
-
         function handler(ev) {
             const e = ev.touches ? ev.touches[0] : ev;
             x.set(e.clientX + offset.x);

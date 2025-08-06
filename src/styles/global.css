@@ -69,5 +69,5 @@ html, body {
 
 html:not(:has( .board)), body:not(:has( .board)) {
     --rgba: rgba(0, 0, 0, .8);
-    background-image: linear-gradient( var(--rgba), var(--rgba) ), url('./assets/dg_bg.png');
+    background-image: url('./assets/dg_bg.png');
 }

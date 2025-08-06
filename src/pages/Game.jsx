@@ -11,6 +11,7 @@ import useGameState from '../hooks/useGameState'
 import CustomModal from '../components/CustomModal'
 import ModalContent from '../components/ModalContent'
 import MouseTracker from '../components/MouseTracker'
+import MouseTrackerContent from '../components/MouseTrackerContent'
 import Card from "../components/Card"
 import Die from '../components/Die'
 
@@ -184,7 +185,11 @@ function Game() {
                         initial={{ x: target.x, y: target.y }}
                         offset={{ x: 10, y: 10 }}
                     >
-                        <span>Opa</span>
+                        <MouseTrackerContent 
+                            target={target}
+                            hasPotted={hasPotted}
+                            weapon={equippedWeapons[0] || null}
+                        />
                     </MouseTracker>
                 )}
             </AnimatePresence>
