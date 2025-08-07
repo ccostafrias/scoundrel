@@ -10,7 +10,6 @@
 
 .board {
   --offset-y: -1.3em;
-  box-sizing: content-box;
   display: grid;
   grid-template-columns: 1fr 4fr 1fr;
   grid-template-rows: auto auto;
@@ -34,8 +33,8 @@
 
 /* Top row */
 .dungeon {
-    grid-column: 1;
-    grid-row: 1;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .dungeon::after {
@@ -109,89 +108,6 @@
 
 .skip-bttn:enabled:hover {
   filter: brightness(1.2);
-}
-
-/* Estilos visuais */
-.card, .card-place {
-  aspect-ratio: var(--aspect);
-  width: var(--min);
-  font-weight: bold;
-  text-align: center;
-  border-radius: 8px;
-  padding: 0;
-}
-
-.card {
-  --c: 0;
-  --r: 0;
-  --sprite-w: 48;
-  --sprite-h: 64;
-  --pad-x: 0;
-  --pad-y: 0;
-  --tot-c: 15;
-  --tot-r: 5;
-  --back-c: 0;
-  --back-r: 4;
-  --img-w: calc((var(--tot-c) * var(--sprite-w) + (var(--tot-c)) * var(--pad-x)));
-  --img-h: calc((var(--tot-r) * var(--sprite-h) + (var(--tot-r)) * var(--pad-y)));
-
-  box-sizing: border-box;
-  position: absolute;
-  cursor: pointer;
-  z-index: 100;
-}
-
-.card .flip {
-  width: 100%;
-  height: 100%;
-  transition: transform .5s ease;
-  transform-style: preserve-3d;
-}
-
-.card-back {
-  background-position:
-    calc(
-      (var(--back-c) * (var(--sprite-w) + var(--pad-x))) / (var(--img-w) - var(--sprite-w) - var(--pad-x)) * 100%
-    )
-    calc(
-      (var(--back-r) * (var(--sprite-h) + var(--pad-y))) / (var(--img-h) - var(--sprite-h) - var(--pad-y)) * 100%
-    );
-}
-
-.card-front {
-  transform: rotateY(-180deg);
-  background-position:
-    calc(
-      (var(--c) * (var(--sprite-w) + var(--pad-x))) / (var(--img-w) - var(--sprite-w) - var(--pad-x)) * 100%
-    )
-    calc(
-      (var(--r) * (var(--sprite-h) + var(--pad-y))) / (var(--img-h) - var(--sprite-h) - var(--pad-y)) * 100%
-    );
-}
-
-.card-back, .card-front {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  backface-visibility: hidden;
-
-  image-rendering: -moz-crisp-edges;   /* Firefox */
-  image-rendering: -webkit-optimize-contrast; /* Safari */
-  image-rendering: pixelated;
-
-  background-size: calc(var(--img-w) / var(--sprite-w) * 100%);
-  background-repeat: no-repeat;
-}
-
-.card-place {
-  position: relative;
-  background: transparent;
-  box-shadow: none;
-  border: 2px dashed var(--c4);
-  opacity: 1;
 }
 
 .life-container {

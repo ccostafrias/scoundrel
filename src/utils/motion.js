@@ -14,6 +14,17 @@ export const pageVariants = {
 
 }
 
+export const buttonVariants = {
+  hidden: {
+    opacity: 0,
+    pointerEvents: "none"
+  },
+  visible: {
+    opacity: 1,
+    pointerEvents: "auto"
+  },
+}
+
 export const pageTransition = {
   type: "spring",
   ease: "easeIn",

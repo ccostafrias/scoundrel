@@ -1,22 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from "react-router-dom"
 import { motion } from 'framer-motion' // 'framer-motion/dist/framer-motion'
-import { pageTransition, pageVariants } from "../utils/motion"
 
-import Vitrine from '../components/Vitrine'
+import { pageTransition, pageVariants } from "../utils/motion"
+import { deckConfig } from '../utils/deckConfig'
+import objectToArrayWithName from '../utils/objectToArrayWithName'
+
+import { useDeck } from '../contexts/DeckContext'
+
+import Carousel from '../components/Carousel'
+import CardCarousel from '../components/CardCarousel'
 
 import "../styles/Home.css"
+import "../styles/Card.css"
 
 export default function Home() {
     const navigate = useNavigate()
 
+    const { deckName, setDeckName } = useDeck()
+
     function startGame() {
         navigate(`/jogo`)
     }
+    
+    const decks = objectToArrayWithName(deckConfig)
 
+    const [active, setActive] = useState(0)
+    const [torchPositions, setTorchPositions] = useState([])
     const torchLeftRef = useRef(null);
     const torchRightRef = useRef(null);
-    const [torchPositions, setTorchPositions] = useState([])
 
     useEffect(() => {
         const updatePositions = () => {
@@ -58,12 +70,37 @@ export default function Home() {
                     <div className='torch' ref={torchRightRef}></div>
                 </div>
                 <div className='home-content'>
-                    <div className='bttns-wrapper'>
+                    {/* <div className='bttns-wrapper'>
                         <button className='bttn' onClick={startGame}>Play Game</button>
                         <button className='bttn' disabled onClick={() => {}}>Leaderboards</button>
                         <button className='bttn' onClick={() => window.open('http://stfj.net/art/2011/Scoundrel.pdf')}>Rules</button>
+                    </div> */}
+                    <div className='carousel-container'>
+                        <Carousel
+                            active={active}
+                            setActive={setActive}
+                        >
+                            {decks.map((actualDeck, index) => {
+                                return (
+                                    <div className="carousel-card--wrapper" key={index}>
+                                        <motion.span 
+                                            className='carousel-name'
+                                            initial={{ opacity: 0, y: 0 }}
+                                            animate={index == active ? { opacity: 1, y: 0 } : { opacity: 0, y: 0 }}
+                                            style={{ 
+                                                pointerEvents: 'none', 
+                                                display: 'inline-block', 
+                                                userSelect: 'none',
+                                            }}
+                                        >
+                                            {actualDeck.name}
+                                        </motion.span>
+                                        <CardCarousel actualDeck={actualDeck} />
+                                    </div>
+                            )})}
+                        </Carousel>
+                        <button className='bttn'>Select</button>
                     </div>
-                    {/* <Vitrine /> */}
                 </div>
             </main>
             <div className='darkness'>

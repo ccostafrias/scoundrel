@@ -16,6 +16,7 @@ import Card from "../components/Card"
 import Die from '../components/Die'
 
 import "../styles/Game.css"
+import "../styles/Card.css"
 
 function Game() {
     const navigate = useNavigate()
@@ -47,10 +48,6 @@ function Game() {
 
     const actualDeckName = 'set_3'
     const actualDeck = deckConfig[actualDeckName] || null
-
-    useEffect(() => {
-        if (actualDeck) document.body.style.setProperty('--aspect', `${actualDeck.width}/${actualDeck.height}`);
-    }, [actualDeck])
 
     useEffect(() => {
         if (baralho.length > 0) setDungeonCards([...baralho.map(card => ({...card, isInitial: true}))])
@@ -229,7 +226,9 @@ function Game() {
                 exit="out"
                 transition={pageTransition}
             >
-                <div className="board">
+                <div className="board" style={{
+                    '--aspect': `${actualDeck.width}/${actualDeck.height}`,
+                }}>
                     <div className="dungeon card-place">
                         {dungeonCards.map((card, i) => (
                             <Card
