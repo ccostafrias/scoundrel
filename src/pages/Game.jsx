@@ -41,6 +41,7 @@ function Game() {
     const [discardCards, setDiscardCards] = useState([])
     
     const [target, setTarget] = useState(null)
+    const [sub, setSub] = useState(0)
     const [modalOpen, setModalOpen] = useState(false)
     const [animacoesFinalizadas, setAnimacoesFinalizadas] = useState(0)
 
@@ -112,17 +113,7 @@ function Game() {
         }
         // Espadas/Paus = monstros
         if (suit == 'Paus' || suit == 'Espadas') {
-            const last = equippedWeapons.at(-1)
-            const weapon = equippedWeapons[0]?.suit == 'Ouros' ? equippedWeapons[0] : {power: 0}
-            let sub
-            
-            if ((last && (last.suit == 'Espadas' || last.suit == 'Paus') && power >= last.power) || weapon.power == 0) {
-                sub = card.power
-                setDiscardCards(prev => [...prev, card])
-            } else {
-                sub = Math.max(0, (power - weapon.power))
-                setEquippedWeapons(prev => [...prev, card])
-            }
+            const sub = calcSub(card)
             
             removeRoomCard()
             takeDamage(sub)
@@ -164,6 +155,23 @@ function Game() {
         } else return null
     }
 
+    function calcSub(card, justCalculate = false) {
+        const last = equippedWeapons.at(-1)
+        const weapon = equippedWeapons[0]?.suit == 'Ouros' ? equippedWeapons[0] : {power: 0}
+        let sub
+        
+        if ((last && (last.suit == 'Espadas' || last.suit == 'Paus') && card.power >= last.power) || weapon.power == 0) {
+            sub = card.power
+             if (!justCalculate) setDiscardCards(prev => [...prev, card])
+        } else {
+            sub = Math.max(0, (card.power - weapon.power))
+            if (!justCalculate) setEquippedWeapons(prev => [...prev, card])
+        }
+
+        setSub(sub)
+        return sub
+    }
+
     function handleReset() {
         resetGame()
         setRoomCards([null, null, null, null])
@@ -172,10 +180,6 @@ function Game() {
         setDungeonCards([...embaralharCartas(baralho)])
         setAnimacoesFinalizadas(0)
     }
-
-    useEffect(() => {
-        // console.log('Target changed:', target)
-    }, [target])
 
     return (
         <>
@@ -189,6 +193,7 @@ function Game() {
                             target={target}
                             hasPotted={hasPotted}
                             weapon={equippedWeapons[0] || null}
+                            sub={sub}
                         />
                     </MouseTracker>
                 )}
@@ -290,13 +295,22 @@ function Game() {
                                                 }}
                                                 actualDeck={actualDeck}
                                                 onAnimationComplete={() => {}}
-                                                onClick={() => handleRoomClick(roomCards[i])}
-                                                handleMouseEnter={(e) => setTarget({
-                                                    card: roomCards[i],
-                                                    x: e.pageX,
-                                                    y: e.pageY,
-                                                })}
-                                                handleMouseLeave={() => setTarget(null)}
+                                                onClick={() => {
+                                                    handleRoomClick(roomCards[i])
+                                                    setTarget(null)
+                                                }}
+                                                handleMouseEnter={(e) => {
+                                                    setTarget({
+                                                        card: roomCards[i],
+                                                        x: e.pageX,
+                                                        y: e.pageY,
+                                                    })
+                                                    calcSub(roomCards[i], true)
+                                                }}
+                                                handleMouseLeave={() => {
+                                                    setTarget(null)
+                                                    setSub(0)
+                                                }}
                                             />
                                         )}
                                     </div>

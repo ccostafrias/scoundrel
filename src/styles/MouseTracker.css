@@ -9,6 +9,67 @@
   white-space: nowrap;
   transform-origin: top left;
   /* visibility: hidden; */
+  font-family: var(--font-terc);
+  font-weight: normal;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
   z-index: 100;
+}
+
+.mouse-tracker-content {
+  display: flex;
+  align-items: center;
+  /* gap: 0.5em; */
+}
+
+.tracker-value {
+  position: relative;
+}
+
+.tracker-value.dashed, .tracker-signal:has(~ .tracker-value.dashed) {
+  /* text-decoration: line-through; */
+  opacity: .5;
+}
+
+.tracker-value.dashed::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  transform-origin: top left;
+  transform: rotate(45deg);
+  display: inline-block;
+  width: 141%;
+  border-bottom: 2px solid white;
+}
+
+.tracker-icon {
+  aspect-ratio: 1/1;
+  width: 1em;
+  margin-right: .2em;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.tracker-icon.potion {
+  background-image: url('./assets/icons/potion.png');
+}
+
+.tracker-icon.sword {
+  background-image: url('./assets/icons/sword.png');
+}
+
+.tracker-icon.weapon {
+  background-image: url('./assets/icons/weapon.png');
+}
+
+.tracker-secondary-value {
+  margin-left: 5px;
+}
+
+.tracker-value.potion, .tracker-signal.potion {
+  color: var(--green);
+}
+
+.tracker-value.sword, .tracker-signal.sword, .tracker-secondary-value.sword  {
+  color: var(--red);
 }

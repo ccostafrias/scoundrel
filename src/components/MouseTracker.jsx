@@ -5,8 +5,8 @@ import { createPortal } from 'react-dom';
 import '../styles/MouseTracker.css';
 
 export default function MouseTracker({ children, offset = { x: 0, y: 0}, initial = { x: 0, y: 0 } }) {
-    const x = useMotionValue(initial.x);
-    const y = useMotionValue(initial.y);
+    const x = useMotionValue(initial.x + offset.x);
+    const y = useMotionValue(initial.y + offset.y);
 
     useEffect(() => {
         function handler(ev) {

@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from "react-router-dom"
 import { motion } from 'framer-motion' // 'framer-motion/dist/framer-motion'
 import { pageTransition, pageVariants } from "../utils/motion"
+
+import Vitrine from '../components/Vitrine'
+
 import "../styles/Home.css"
 
 export default function Home() {
@@ -19,8 +22,6 @@ export default function Home() {
         const updatePositions = () => {
             const leftRect = torchLeftRef.current?.getBoundingClientRect()
             const rightRect = torchRightRef.current?.getBoundingClientRect()
-
-            console.log(leftRect, rightRect)
 
             setTorchPositions([
                 {
@@ -56,10 +57,13 @@ export default function Home() {
                     <h1 className='title'>Scoundrel</h1>
                     <div className='torch' ref={torchRightRef}></div>
                 </div>
-                <div className='bttns-wrapper'>
-                    <button className='bttn' onClick={startGame}>Play Game</button>
-                    <button className='bttn' disabled onClick={() => {}}>Leaderboards</button>
-                    <button className='bttn' onClick={() => window.open('http://stfj.net/art/2011/Scoundrel.pdf')}>Rules</button>
+                <div className='home-content'>
+                    <div className='bttns-wrapper'>
+                        <button className='bttn' onClick={startGame}>Play Game</button>
+                        <button className='bttn' disabled onClick={() => {}}>Leaderboards</button>
+                        <button className='bttn' onClick={() => window.open('http://stfj.net/art/2011/Scoundrel.pdf')}>Rules</button>
+                    </div>
+                    {/* <Vitrine /> */}
                 </div>
             </main>
             <div className='darkness'>

@@ -29,22 +29,6 @@ input, button {
     cursor: pointer;
 }
 
-html {
-    overflow: hidden;
-    --c1: #1e1e1e;
-    --c2: #3c3d3f;
-    --c3: #292929;
-    --c4: rgb(166, 166, 166);
-    --text: #abb2bf;
-}
-
-html.dark {
-    --bg: #f4f4f5;
-    --bg2: #d6d7db;
-    --bg3: #c7c7c7;
-    --text: #383a42;
-}
-
 body, button, input, textarea, a {
     color: var(--text);
     font-family: var(--font-main);
@@ -56,18 +40,25 @@ body, button, input, textarea, a {
 }
 
 html, body {
+    overflow: hidden;
     background-color: var(--c1);
     background-size: contain;
     background-position: center;
     background-repeat: repeat;
-      image-rendering: -moz-crisp-edges;   /* Firefox */
-    image-rendering: -webkit-optimize-contrast; /* Safari */
+    image-rendering: -moz-crisp-edges; 
+    image-rendering: -webkit-optimize-contrast; 
     image-rendering: pixelated;
     font-size: 1.2rem;
     line-height: 1;
 }
 
-html:not(:has( .board)), body:not(:has( .board)) {
-    --rgba: rgba(0, 0, 0, .8);
+html:has( .home), body:has( .home) {
     background-image: url('./assets/dg_bg.png');
+}
+
+html:has( .board), body:has( .board) {
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 100%;
+    background-image: url('./assets/tb_bg.png');
 }
