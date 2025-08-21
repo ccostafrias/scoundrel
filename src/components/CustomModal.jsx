@@ -23,7 +23,7 @@ export default function CustomModal(props) {
       onAfterClose={onAfterClose}
       shouldCloseOnOverlayClick={shouldClose}
       shouldCloseOnEsc={shouldClose}
-      shouldFocusAfterRender={false}
+      shouldFocusAfterRender={true}
       shouldReturnFocusAfterClose={true}
       className={`modal-content-base ${hasDelay ? 'delay' : ''}`}
       overlayClassName="modal-overlay"

@@ -39,7 +39,7 @@ export default function Carousel({active, setActive, children}) {
                             opacity: distance > MAX_VISIBLE ? 0 : 1,
                             rotateY: distance*-signal*15,
                             filter: `blur(${distance * 2}px) brightness(${Math.pow(2, -distance)})`,
-                            x: isActive ? 0 : (distance * 150) * signal,
+                            x: isActive ? 0 : (distance * 120) * signal,
                             z: distance*-150,
                             pointerEvents: isActive ? 'auto' : 'none',
                         }}

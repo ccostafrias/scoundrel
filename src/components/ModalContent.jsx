@@ -9,7 +9,7 @@ export default function ModalContent(props) {
     } = props
 
     const monsterPower = dungeonCards.reduce((acc, curr) => acc + (curr.suit == 'Paus' || curr.suit == 'Espadas' ? curr.power : 0), 0)
-    const lastPot = discardCards.at(-1).suit == 'Copas' ? discardCards.at(-1) : {power: 0}
+    const lastPot = (discardCards.length > 0 && discardCards.at(-1).suit == 'Copas' ? discardCards.at(-1) : {power: 0})
     const total = gameState == 'gameOver' ? life - monsterPower : life + lastPot.power
 
     return (

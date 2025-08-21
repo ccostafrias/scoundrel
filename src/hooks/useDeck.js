@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export default function useBaralho() {
+export default function useDeck() {
   const [baralho, setBaralho] = useState([]);
 
   // Gera o baralho sem as cartas restritas

@@ -143,7 +143,6 @@ export default function Die(props) {
 
     const {x, y, z, r} = angles[face] || {x: xAngle[1], y: yAngle[1], z: zAngle[1], r: 0}
 
-
     return (
         <div>
             <div className='die-container' style={{
@@ -174,8 +173,8 @@ export default function Die(props) {
                     <div className="face face-20"></div>
                 </div>
             </div>
+            
             {/* <div>
-                <input type="number" value={life} onChange={(e) => setLife(e.target.value)}/>
                 <RangeSlider
                     min={-180}
                     max={180}

@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from "react-router-dom"
 import { motion } from 'framer-motion' // 'framer-motion/dist/framer-motion'
 
-import { pageTransition, pageVariants } from "../utils/motion"
+import { pageTransition, pageVariants, pageStyle } from "../utils/motion"
 import { deckConfig } from '../utils/deckConfig'
 import objectToArrayWithName from '../utils/objectToArrayWithName'
 
-import { useDeck } from '../contexts/DeckContext'
+import { useDeckTheme } from '../contexts/DeckContext'
 
 import Carousel from '../components/Carousel'
 import CardCarousel from '../components/CardCarousel'
@@ -17,7 +17,7 @@ import "../styles/Card.css"
 export default function Home() {
     const navigate = useNavigate()
 
-    const { deckName, setDeckName } = useDeck()
+    const { deckName, setDeckName } = useDeckTheme()
 
     function startGame() {
         navigate(`/jogo`)
@@ -25,7 +25,7 @@ export default function Home() {
     
     const decks = objectToArrayWithName(deckConfig)
 
-    const [active, setActive] = useState(0)
+    const [active, setActive] = useState(decks.findIndex(deck => deck.name == deckName) || 0)
     const [torchPositions, setTorchPositions] = useState([])
     const torchLeftRef = useRef(null);
     const torchRightRef = useRef(null);
@@ -56,13 +56,15 @@ export default function Home() {
     }, [])
 
     return (
-        <motion.div
-            variants={pageVariants}
-            initial="initial"
-            animate="in"
-            exit="out"
-            transition={pageTransition}
-        >
+        <>
+            <motion.div
+                style={pageStyle}
+                variants={pageVariants}
+                initial="initial"
+                animate="in"
+                exit="out"
+                // transition={pageTransition}
+            />
             <main className="home">
                 <div className='title-wrapper'>
                     <div className='torch' ref={torchLeftRef}></div>
@@ -70,11 +72,11 @@ export default function Home() {
                     <div className='torch' ref={torchRightRef}></div>
                 </div>
                 <div className='home-content'>
-                    {/* <div className='bttns-wrapper'>
+                    <div className='bttns-wrapper'>
                         <button className='bttn' onClick={startGame}>Play Game</button>
                         <button className='bttn' disabled onClick={() => {}}>Leaderboards</button>
                         <button className='bttn' onClick={() => window.open('http://stfj.net/art/2011/Scoundrel.pdf')}>Rules</button>
-                    </div> */}
+                    </div>
                     <div className='carousel-container'>
                         <Carousel
                             active={active}
@@ -95,11 +97,17 @@ export default function Home() {
                                         >
                                             {actualDeck.name}
                                         </motion.span>
-                                        <CardCarousel actualDeck={actualDeck} />
+                                        <CardCarousel isActive={index == active} isSelected={decks[index].name == deckName} actualDeck={actualDeck} />
                                     </div>
                             )})}
                         </Carousel>
-                        <button className='bttn'>Select</button>
+                        <button 
+                            className='bttn' 
+                            onClick={() => setDeckName(decks[active].name)}
+                            disabled={decks[active].name == deckName}
+                        >
+                            {decks[active].name == deckName ? 'Selected' : 'Select'}
+                        </button>
                     </div>
                 </div>
             </main>
@@ -118,6 +126,6 @@ export default function Home() {
                     />
                 ))}
             </div>
-        </motion.div>
+        </>
     );
 }

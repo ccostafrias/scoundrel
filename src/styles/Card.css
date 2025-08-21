@@ -82,3 +82,7 @@
   outline: 2px dashed var(--c4);
   opacity: 1;
 }
+
+.card-place.selected {
+  outline: 2px dashed rgb(255, 217, 0);
+}

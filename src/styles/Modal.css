@@ -9,7 +9,7 @@
   opacity: 0;
   /* font-size: 1.5em; */
   transition: opacity 200ms ease-in-out;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 500;
   position: fixed;
   top: 0; left: 0;

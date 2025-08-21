@@ -1,22 +1,17 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, use, useState, useEffect } from 'react';
+
+import { deckConfig } from '../utils/deckConfig'
 
 const DeckContext = createContext();
 const LOCAL_KEY = 'currentDeckName';
 
 export function DeckProvider({ children }) {
-  const [deckName, setDeckName] = useState('set_2');
-
-  // Carrega o valor do localStorage ao iniciar
-  useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_KEY);
-    if (saved !== null) {
-      setDeckName(Number(saved));
-    }
-  }, []);
+  const [deckName, setDeckName] = useState(localStorage.getItem(LOCAL_KEY) || 'set_2');
 
   // Atualiza localStorage sempre que o deck mudar
   useEffect(() => {
-    localStorage.setItem(LOCAL_KEY, deckName);
+    let save = !deckConfig[deckName] ? 'set_2' : deckName
+    localStorage.setItem(LOCAL_KEY, save);
   }, [deckName]);
 
   return (
@@ -26,6 +21,6 @@ export function DeckProvider({ children }) {
   );
 }
 
-export function useDeck() {
-  return useContext(DeckContext);
+export function useDeckTheme() {
+  return use(DeckContext)
 }

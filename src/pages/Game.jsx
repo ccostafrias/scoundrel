@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'; 
 import { motion, AnimatePresence } from 'framer-motion'
 
-import { pageTransition, pageVariants } from "../utils/motion"
+import { pageTransition, pageVariants, pageStyle } from "../utils/motion"
 import { deckConfig } from '../utils/deckConfig'
 
 import useDeck from '../hooks/useDeck'
 import useGameState from '../hooks/useGameState'
+
+import { useDeckTheme } from '../contexts/DeckContext'
 
 import CustomModal from '../components/CustomModal'
 import ModalContent from '../components/ModalContent'
@@ -34,8 +36,11 @@ function Game() {
         skipRound,
         setGameState,
         resetGame,
-    } = useGameState(20);
+        setLife
+    } = useGameState(20)
     
+    const { deckName, setDeckName } = useDeckTheme()
+
     const [dungeonCards, setDungeonCards] = useState([])
     const [roomCards, setRoomCards] = useState([null, null, null, null])
     const [equippedWeapons, setEquippedWeapons] = useState([])
@@ -46,31 +51,32 @@ function Game() {
     const [modalOpen, setModalOpen] = useState(false)
     const [animacoesFinalizadas, setAnimacoesFinalizadas] = useState(0)
 
-    const actualDeckName = 'set_3'
-    const actualDeck = deckConfig[actualDeckName] || null
+    const actualDeck = deckConfig[deckName] || deckConfig[set_1]
 
     useEffect(() => {
-        if (baralho.length > 0) setDungeonCards([...baralho.map(card => ({...card, isInitial: true}))])
-    }, [baralho])
+        if (baralho.length > 0 && dungeonCards.length == 0) setDungeonCards([...baralho.map(card => ({...card, isInitial: true}))])
+    }, [baralho, dungeonCards])
+
+    useEffect(() => {
+    if (animacoesFinalizadas === baralho.length && baralho.length > 0) {
+        setDungeonCards(prev => [...prev.map(card => ({...card, isInitial: false}))])
+    }
+    }, [animacoesFinalizadas])
 
     useEffect(() => {
         if (dungeonCards.some(card => card.isInitial)) return
 
         const allRoomEmpty = roomCards.every(card => !card)
 
-        if (allRoomEmpty && dungeonCards.length > 0) {
-            fillRoom()
-            nextRound()
-        } else if (animacoesFinalizadas > 0 && dungeonCards.length == 0 && allRoomEmpty) {
-            setGameState('win')
+        if (allRoomEmpty) {
+            if (dungeonCards.length > 0) {
+                fillRoom()
+                nextRound()
+            } else if (dungeonCards.length == 0) {
+                handleWin()
+            }
         }
     }, [dungeonCards, roomCards])
-
-    useEffect(() => {
-        if (animacoesFinalizadas === baralho.length && baralho.length > 0) {
-            setDungeonCards(prev => [...prev.map(card => ({...card, isInitial: false}))])
-        }
-    }, [animacoesFinalizadas])
 
     useEffect(() => {
         if (roundSkipped == 0) return
@@ -89,6 +95,13 @@ function Game() {
             setModalOpen(true)
         }
     }, [gameState])
+
+    const handleWin = () => {
+        if (animacoesFinalizadas == 0) return
+        if (life <= 0) return
+
+        setGameState('win')
+    }
 
     const handleRoomClick = (card) => {
         const { value, suit, power } = card
@@ -127,9 +140,27 @@ function Game() {
 
     const handleDungeonClick = () => {
         if (animacoesFinalizadas != baralho.length) return
+
         if (fillRoom(3)) {
             nextRound()
         }
+    }
+
+    const handleMouseEnter = (e, i) => {
+        if (roomCards[i] == null) return
+        setTarget({
+            card: roomCards[i],
+            x: e.pageX,
+            y: e.pageY
+        })
+
+        calcSub(roomCards[i], true)
+    }
+
+    const handleMouseLeave = (e, i) => {
+        if (roomCards[i] == null) return
+
+        setTarget(null)
     }
 
     function fillRoom (n = 1) {
@@ -169,12 +200,28 @@ function Game() {
         return sub
     }
 
-    function handleReset() {
+    const handleReset = () => {
         resetGame()
+
+        const allCards = [
+            ...roomCards.filter(Boolean),   // evita null
+            ...discardCards,
+            ...equippedWeapons,
+            ...dungeonCards,
+        ]
+
+        const preparedCards = allCards.map((card, index) => ({
+            ...card,
+            initialPos: 0,
+            isInitial: true,
+        }))
+
+        const shuffled = embaralharCartas(preparedCards)
+
         setRoomCards([null, null, null, null])
         setDiscardCards([])
         setEquippedWeapons([])
-        setDungeonCards([...embaralharCartas(baralho)])
+        setDungeonCards([...shuffled])
         setAnimacoesFinalizadas(0)
     }
 
@@ -202,8 +249,8 @@ function Game() {
                 title={gameState == 'gameOver' ? 'Game Over!' : 'Victory!'}
                 footer={
                     <>
-                        <button className='modal-bttn' onClick={() => {setModalOpen(false)}}>Restart</button>
-                        <button className='modal-bttn' onClick={() => {setModalOpen(false); navigate('/')}}>Menu</button>
+                        <button className='bttn md auto' onClick={() => {setModalOpen(false)}}>Restart</button>
+                        <button className='bttn md auto' onClick={() => {navigate('/')}}>Menu</button>
                     </>
                 }
                 shouldClose={false}
@@ -218,25 +265,29 @@ function Game() {
                     />
                 </>
             </CustomModal>
-             <motion.div 
-                className="main-game"
+            <motion.div 
+                style={pageStyle}
                 variants={pageVariants}
                 initial="initial"
                 animate="in"
                 exit="out"
-                transition={pageTransition}
-            >
+                // transition={pageTransition}
+            />
+            <div className="main-game">
                 <div className="board" style={{
                     '--aspect': `${actualDeck.width}/${actualDeck.height}`,
                 }}>
-                    <div className="dungeon card-place">
+                    <div className="dungeon card-place" onClick={(e) => {
+                        e.stopPropagation()
+                        if (dungeonCards.length > 0) handleDungeonClick()
+                    }}>
                         {dungeonCards.map((card, i) => (
                             <Card
                                 key={card.id}
                                 card={card}
                                 initial={card.isInitial ? {
-                                    y: window.innerHeight,
-                                    x: -window.innerWidth,
+                                    y: card.initialPos || window.innerHeight,
+                                    x: card.initialPos || -window.innerWidth,
                                     rotate: -10,
                                 } : false}
                                 animate={{
@@ -255,66 +306,62 @@ function Game() {
                                 flipAnimate={!card.isInitial ? {
                                     rotateY: 0,
                                 } : null}
-                                flipTransition={false}
+                                flipTransition={{
+                                    duration: 0.5,
+                                    ease: 'backInOut',
+                                    delay: i * 0.1    // Efeito de cascata
+                                }}
                                 actualDeck={actualDeck}
                                 onAnimationComplete={() => {
                                     if (!card.isInitial) return
                                     setAnimacoesFinalizadas(prev => prev + 1)
                                 }}
-                                onClick={() => handleDungeonClick(card)}
                             />
                         ))}
                     </div>
                     <div className="room">
                         {[3, 2, 1, 0]
-                            .map((i) => {
-                                return (
-                                    <div className="card-place" key={i}>
-                                        {roomCards[i]?.value && (
-                                            <Card
-                                                key={roomCards[i].id}
-                                                card={roomCards[i]}
-                                                initial={false}
-                                                animate={false}
-                                                transition={{
-                                                    duration: 0.5,
-                                                    ease: 'easeOut',
-                                                    delay: i * 0.2    // Efeito de cascata
-                                                }}
-                                                flipInitial={{
-                                                    rotateY: 0,
-                                                }}
-                                                flipAnimate={{
-                                                    rotateY: -180,
-                                                }}
-                                                flipTransition={{
-                                                    duration: 0.5,
-                                                    ease: 'backInOut',
-                                                    delay: i * 0.1    // Efeito de cascata
-                                                }}
-                                                actualDeck={actualDeck}
-                                                onAnimationComplete={() => {}}
-                                                onClick={() => {
-                                                    handleRoomClick(roomCards[i])
-                                                    setTarget(null)
-                                                }}
-                                                handleMouseEnter={(e) => {
-                                                    setTarget({
-                                                        card: roomCards[i],
-                                                        x: e.pageX,
-                                                        y: e.pageY,
-                                                    })
-                                                    calcSub(roomCards[i], true)
-                                                }}
-                                                handleMouseLeave={() => {
-                                                    setTarget(null)
-                                                    setSub(0)
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                )
-                            })
+                            .map((i) => (
+                                <div 
+                                    className="card-place" 
+                                    key={i}
+                                    onMouseEnter={(e) => handleMouseEnter(e, i)}
+                                    onMouseLeave={(e) => handleMouseLeave(e, i)}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        if (roomCards[i] == null) return
+
+                                        handleRoomClick(roomCards[i])
+                                        setTarget(null)
+                                    }}
+                                >
+                                    {roomCards[i]?.value && (
+                                        <Card
+                                            key={roomCards[i].id}
+                                            card={roomCards[i]}
+                                            initial={false}
+                                            animate={false}
+                                            transition={{
+                                                duration: 0.5,
+                                                ease: 'easeOut',
+                                                delay: i * 0.2    // Efeito de cascata
+                                            }}
+                                            flipInitial={{
+                                                rotateY: 0,
+                                            }}
+                                            flipAnimate={{
+                                                rotateY: -180,
+                                            }}
+                                            flipTransition={{
+                                                duration: 0.5,
+                                                ease: 'backInOut',
+                                                delay: i * 0.1    // Efeito de cascata
+                                            }}
+                                            actualDeck={actualDeck}
+                                        />
+                                    )}
+                                </div>
+                            ))
                         }
                     </div>
                     <div className="discard card-place">
@@ -341,8 +388,6 @@ function Game() {
                                     }}
                                     flipTransition={false}
                                     actualDeck={actualDeck}
-                                    onAnimationComplete={() => {}}
-                                    onClick={() => {}}
                                 />
                             ))
                         )}
@@ -354,8 +399,8 @@ function Game() {
                                     key={card.id}
                                     card={card}
                                     initial={{
-                                        x: i * 40,
-                                        y: i * 20
+                                        x: i !== 0 ? 15 + i * 25 : 0,
+                                        y: i !== 0 ? 5 + i * 15 : 0
                                     }}
                                     animate={false}
                                     transition={{
@@ -369,28 +414,34 @@ function Game() {
                                     flipAnimate={false}
                                     flipTransition={false}
                                     actualDeck={actualDeck}
-                                    onAnimationComplete={() => {}}
-                                    onClick={() => {}}
                                 />
                             ))
                         )}
                     </div>
                     <div className='life-container'>
-                        <Die 
+                        <Die
                             face={life > 0 ? life : 1}
                         />
+                        {/* <input type="number" value={life} onChange={(e) => setLife(e.target.value)}/> */}
                     </div>
-                    <div className='skip-container'>
-                        <button 
-                            className='skip-bttn' 
+                    <div className='bttns-container'>
+                        <button
+                            className='bttn md'
                             onClick={skipRound}
                             disabled={roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4}
                         >
                             Avoid
                         </button>
+                        <button
+                            className='bttn md'
+                            onClick={() => setGameState('gameOver')}
+                            // disabled={roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4}
+                        >
+                            Give Up
+                        </button>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </>
     )
 }

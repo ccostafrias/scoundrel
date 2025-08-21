@@ -1,17 +1,31 @@
 export const pageVariants = {
   initial: {
-    opacity: 0,
-    scale: 0.8 // Começa um pouco menor (para zoom in)
+    opacity: 1,
   },
   in: {
-    opacity: 1,
-    scale: 1 // Vai para o tamanho normal
+    opacity: [1, 0.4, 0.7, 0.3, 0.5, 0], // fade para transparente com flicker
+    transition: {
+      duration: 2,
+      times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      ease: "easeInOut",
+    },
   },
   out: {
-    opacity: 0,
-    scale: 0.6 // Zoom out um pouco ao sair
-  }
+    opacity: [0, 0.3, 0.6, 0.2, 0.5, 1], // fade para preto com flicker
+    transition: {
+      duration: 1,
+      times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      ease: "easeInOut",
+    },
+  },
+}
 
+export const pageStyle = {
+  pointerEvents: 'none',
+  position: "absolute",
+  inset: 0,
+  backgroundColor: "black", // cor do fundo
+  zIndex: 999,
 }
 
 export const buttonVariants = {
@@ -26,7 +40,7 @@ export const buttonVariants = {
 }
 
 export const pageTransition = {
-  type: "spring",
-  ease: "easeIn",
-  duration: 0.3
+  // type: "spring",
+  // ease: "easeIn",
+  duration: .5
 }
