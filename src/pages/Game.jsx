@@ -50,7 +50,6 @@ function Game() {
     const [modalOpen, setModalOpen] = useState(false)
     const [trigger, setTrigger] = useState({type: 'start', count: 0})
     const finishedCount = useRef(0)
-    const finishedCards = useRef([])
 
     const actualDeck = deckConfig[deckName] || deckConfig[set_1]
     const isAvoidable = !(roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4)
@@ -59,15 +58,18 @@ function Game() {
         if (baralho.length == 0 || trigger.type == '') return
 
         if (trigger.type == 'start') {
-            setDungeonCards([...baralho.map((card, i) => ({...card, cameFrom: 'start', goingTo: 'dungeon', isReturning: false, posIni: i}))])
+            setDungeonCards([...baralho.map((card, i) => ({...card, cameFrom: 'start', goingTo: 'dungeon', posIni: i}))])
             setTrigger({type: '', count: 0})
         } else if (trigger.type == 'started') {
-            setDungeonCards(prev => [...prev.map(card => ({...card, cameFrom: 'stop', isReturning: false}))])
+            setDungeonCards(prev => [...prev.map(card => ({...card, cameFrom: 'stop'}))])
             setTrigger({type: 'fill', count: 0})
         } else if (trigger.type == 'avoided') {
             setTrigger({type: 'fill', count: 0})
         } else if (trigger.type == 'fill') {
             fillRoom()
+            setTrigger({type: '', count: 0})
+        } else if (trigger.type == 'shuffle') {
+            setDungeonCards(prev => [...embaralharCartas(prev.map(card => ({...card, cameFrom: 'shuffle', goingTo: 'shuffle', returningCount: 0})))])
             setTrigger({type: '', count: 0})
         }
 
@@ -83,13 +85,21 @@ function Game() {
         }
     }, [gameState])
 
-    const handleComplete = (card) => {
-        if (card.isReturning) {
+    const handleComplete = (e, card) => {
+        console.log(e)
+        if (card.cameFrom == 'shuffle') {
             finishedCount.current += 1
-            console.log('opaaaa')
+            
+            if (finishedCount.current === baralho.length && baralho.length > 0) {
+                console.log(finishedCount.current, baralho.length)
+                setTrigger({type: 'started', count: 0})
+                finishedCount.current = 0
+            }
+        } else if (card.cameFrom.toLowerCase().includes('returning')) {
+            finishedCount.current += 1
 
             if (finishedCount.current === baralho.length && baralho.length > 0) {
-                setTrigger({type: 'started', count: 0})
+                setTrigger({type: 'shuffle', count: 0})
                 finishedCount.current = 0
             }
         } else if (card.cameFrom == 'start') {
@@ -106,6 +116,9 @@ function Game() {
                 setTrigger({type: 'avoided', count: 0})
                 finishedCount.current = 0
             }
+        } else if (card.cameFrom == 'room' && countEmpties(roomCards) === 4) {
+            setTrigger({type: 'fill', count: 0})
+            finishedCount.current = 0
         }
     }
 
@@ -142,7 +155,7 @@ function Game() {
             if (toWhere == 'equipped') {
                 setEquippedWeapons(prev => [...prev, {...card, cameFrom: 'room', goingTo: 'equipped'}])
             } else if (toWhere == 'discard') {
-                setDiscardCards(prev => [...prev, {...card, cameFrom: 'room', goingTo: 'discard'}])
+                setDiscardCards(prev => [...prev, {...card, cameFrom: 'roomAvoid', goingTo: 'discard'}])
             }
 
             takeDamage(sub)
@@ -152,7 +165,7 @@ function Game() {
             if (!hasPotted) {
                 takePotion(power)
             }
-            setDiscardCards(prev => [...prev, {...card, cameFrom: 'room', goingTo: 'discard'}])
+            setDiscardCards(prev => [...prev, {...card, cameFrom: 'roomAvoid', goingTo: 'discard'}])
         }
 
         removeRoomCard()
@@ -236,18 +249,20 @@ function Game() {
         skipRound()
     }
 
-    const handleReset = (shuffle = true) => {
+    const handleReset = (shuffle = false) => {
         resetGame()
 
         const allCards = [
-            ...roomCards.filter(Boolean)?.map(c => ({ ...c, cameFrom: 'room', goingTo: 'dungeon' })),
-            ...discardCards.map(c => ({ ...c, cameFrom: 'discard', goingTo: 'dungeon' })),
-            ...equippedWeapons.map(c => ({ ...c, cameFrom: 'equipped', goingTo: 'dungeon' })),
+            ...discardCards.map(c => ({ ...c, cameFrom: 'discardReturning', goingTo: 'dungeon' })),
+            ...equippedWeapons.map(c => ({ ...c, cameFrom: 'equippedReturning', goingTo: 'dungeon' })),
+            ...roomCards.filter(Boolean)?.map(c => ({ ...c, cameFrom: 'roomReturning', goingTo: 'dungeon' })).reverse(),
         ]
+
+        finishedCount.current = baralho.length - allCards.length        
 
         const returningCards = (cards) => cards.map(card => ({
             ...card,
-            isReturning: true,
+            returningCount: finishedCount.current,
         }))
 
         setRoomCards([null, null, null, null])
@@ -323,7 +338,7 @@ function Game() {
                                 card={card}
                                 index={i}
                                 actualDeck={actualDeck}
-                                onAnimationComplete={(c) => handleComplete(c)}
+                                onAnimationComplete={(e, c) => handleComplete(e, c)}
                             />
                         ))}
                     </div>
@@ -349,6 +364,7 @@ function Game() {
                                             index={i}
                                             card={roomCards[i]}
                                             actualDeck={actualDeck}
+                                            onAnimationComplete={(e, c) => handleComplete(e, c)}
                                         />
                                     )}
                                 </div>
@@ -362,11 +378,8 @@ function Game() {
                                     key={`card-${card.id}`}
                                     index={i}
                                     card={card}
-                                    flipTransition={{
-                                        duration: .5,
-                                        ease: 'backInOut'
-                                    }}
                                     actualDeck={actualDeck}
+                                    onAnimationComplete={(e, c) => handleComplete(e, c)}
                                 />
                             ))
                         )}
@@ -379,6 +392,7 @@ function Game() {
                                     index={i}
                                     card={card}
                                     actualDeck={actualDeck}
+                                    onAnimationComplete={(e, c) => handleComplete(e, c)}
                                 />
                             ))
                         )}
@@ -402,12 +416,12 @@ function Game() {
                         >
                             Give Up
                         </button>
-                        <button
+                        {/* <button
                             className='bttn md'
                             onClick={() => setDungeonCards(prev => [...embaralharCartas(prev)])}
                         >
                             Shuffle
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </div>
