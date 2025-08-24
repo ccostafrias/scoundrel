@@ -24,7 +24,7 @@ export default function useDeck() {
       for (const value of values) {
         const isFigura = ['A', 'J', 'Q', 'K'].includes(value)
         const isCopasOuOuros = suit === 'Copas' || suit === 'Ouros'
-        
+
         if (isFigura && isCopasOuOuros) continue
 
         const power = powerMap[value] || parseInt(value)
@@ -38,12 +38,29 @@ export default function useDeck() {
 
   // Embaralha usando Fisher-Yates
   const embaralharCartas = useCallback((cartas) => {
-    const array = [...cartas];
-    for (let i = array.length - 1; i > 0; i--) {
+    const n = cartas.length;
+    let indices = [...Array(n).keys()]
+
+    // Gera uma permutação qualquer dos índices
+    for (let i = n - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+      [indices[i], indices[j]] = [indices[j], indices[i]];
     }
-    return array;
+
+    // Corrige posições fixas (elemento na mesma posição)
+    for (let i = 0; i < n; i++) {
+      if (indices[i] === i) {
+        // se for o último elemento, troca com qualquer anterior
+        if (i === n - 1) {
+          [indices[i], indices[i - 1]] = [indices[i - 1], indices[i]]
+        } else {
+          [indices[i], indices[i + 1]] = [indices[i + 1], indices[i]]
+        }
+      }
+    }
+
+    // monta o resultado final
+    return indices.map(i => cartas[i]);
   }, []);
 
   // Gera e embaralha ao iniciar

@@ -13,10 +13,7 @@ export default function useGameState(initialLife = 20) {
     setHasPotted(false)
   }
 
-  const skipRound = () => {
-    if (round != 1 && round == roundSkipped + 1) return
-    setRoundSkipped(round)
-  }
+  const skipRound = () => setRoundSkipped(round)
 
   const takePotion = (amount) => {
     if (!hasPotted) {
@@ -27,7 +24,6 @@ export default function useGameState(initialLife = 20) {
 
   const takeDamage = (amount) => {
     const lifeAfterDamage = life - amount
-    console.log(life, amount)
     if (lifeAfterDamage <= 0) setGameState('gameOver')
     setLife(lifeAfterDamage)
   }

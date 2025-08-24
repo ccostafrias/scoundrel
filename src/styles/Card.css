@@ -24,6 +24,7 @@
   --img-h: calc((var(--tot-r) * var(--sprite-h) + (var(--tot-r)) * var(--pad-y)));
 
   perspective: 400px;
+  transform-style: preserve-3d;
   box-sizing: border-box;
   position: absolute;
   cursor: pointer;

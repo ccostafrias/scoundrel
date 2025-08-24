@@ -118,6 +118,8 @@
 }
 
 .bttn.md {
+    width: 180px;
+    font-size: 1em;
     background-image: url('./assets/bttn-md.png');
 }
 

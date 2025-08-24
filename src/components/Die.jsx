@@ -173,36 +173,6 @@ export default function Die(props) {
                     <div className="face face-20"></div>
                 </div>
             </div>
-            
-            {/* <div>
-                <RangeSlider
-                    min={-180}
-                    max={180}
-                    step={36}
-                    thumbsDisabled={[true, false]}
-                    rangeSlideDisabled={true}
-                    value={xAngle}
-                    onInput={setXAngle}
-                />
-                <RangeSlider
-                    min={-180}
-                    max={180}
-                    step={18}
-                    thumbsDisabled={[true, false]}
-                    rangeSlideDisabled={true}
-                    value={yAngle}
-                    onInput={setYAngle}
-                />
-                <RangeSlider
-                    min={-180}
-                    max={180}
-                    step={5}
-                    thumbsDisabled={[true, false]}
-                    rangeSlideDisabled={true}
-                    value={zAngle}
-                    onInput={setZAngle}
-                />
-            </div> */}
         </div>
     )
 }

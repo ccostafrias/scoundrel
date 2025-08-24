@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'; 
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -36,7 +36,6 @@ function Game() {
         skipRound,
         setGameState,
         resetGame,
-        setLife
     } = useGameState(20)
     
     const { deckName, setDeckName } = useDeckTheme()
@@ -49,62 +48,77 @@ function Game() {
     const [target, setTarget] = useState(null)
     const [sub, setSub] = useState(0)
     const [modalOpen, setModalOpen] = useState(false)
-    const [animacoesFinalizadas, setAnimacoesFinalizadas] = useState(0)
+    const [trigger, setTrigger] = useState({type: 'start', count: 0})
+    const finishedCount = useRef(0)
+    const finishedCards = useRef([])
 
     const actualDeck = deckConfig[deckName] || deckConfig[set_1]
+    const isAvoidable = !(roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4)
 
     useEffect(() => {
-        if (baralho.length > 0 && dungeonCards.length == 0) setDungeonCards([...baralho.map(card => ({...card, isInitial: true}))])
-    }, [baralho, dungeonCards])
+        if (baralho.length == 0 || trigger.type == '') return
 
-    useEffect(() => {
-    if (animacoesFinalizadas === baralho.length && baralho.length > 0) {
-        setDungeonCards(prev => [...prev.map(card => ({...card, isInitial: false}))])
-    }
-    }, [animacoesFinalizadas])
-
-    useEffect(() => {
-        if (dungeonCards.some(card => card.isInitial)) return
-
-        const allRoomEmpty = roomCards.every(card => !card)
-
-        if (allRoomEmpty) {
-            if (dungeonCards.length > 0) {
-                fillRoom()
-                nextRound()
-            } else if (dungeonCards.length == 0) {
-                handleWin()
-            }
+        if (trigger.type == 'start') {
+            setDungeonCards([...baralho.map((card, i) => ({...card, cameFrom: 'start', goingTo: 'dungeon', isReturning: false, posIni: i}))])
+            setTrigger({type: '', count: 0})
+        } else if (trigger.type == 'started') {
+            setDungeonCards(prev => [...prev.map(card => ({...card, cameFrom: 'stop', isReturning: false}))])
+            setTrigger({type: 'fill', count: 0})
+        } else if (trigger.type == 'avoided') {
+            setTrigger({type: 'fill', count: 0})
+        } else if (trigger.type == 'fill') {
+            fillRoom()
+            setTrigger({type: '', count: 0})
         }
+
+    }, [baralho.length, dungeonCards, trigger])
+
+    useEffect(() => {
+        handleWin({ life, trigger })
     }, [dungeonCards, roomCards])
 
     useEffect(() => {
-        if (roundSkipped == 0) return
-
-        const actualRoomCards = roomCards
-
-        setRoomCards([null, null, null, null])
-        setDungeonCards(prevDungeon => {
-            const newDungeon = [...actualRoomCards, ...prevDungeon]
-            return newDungeon;
-        })        
-    }, [roundSkipped])
-
-    useEffect(() => {
-        if (gameState == 'gameOver' || gameState == 'win') {
+        if ((gameState == 'gameOver' || gameState == 'win') && !modalOpen) {
             setModalOpen(true)
         }
     }, [gameState])
 
-    const handleWin = () => {
-        if (animacoesFinalizadas == 0) return
-        if (life <= 0) return
+    const handleComplete = (card) => {
+        if (card.isReturning) {
+            finishedCount.current += 1
+            console.log('opaaaa')
 
-        setGameState('win')
+            if (finishedCount.current === baralho.length && baralho.length > 0) {
+                setTrigger({type: 'started', count: 0})
+                finishedCount.current = 0
+            }
+        } else if (card.cameFrom == 'start') {
+            finishedCount.current += 1
+            
+            if (finishedCount.current === baralho.length && baralho.length > 0) {
+                setTrigger({type: 'started', count: 0})
+                finishedCount.current = 0
+            }
+        } else if (card.cameFrom == 'roomAvoid') {
+            finishedCount.current += 1
+
+            if (finishedCount.current === 4 && roomCards.every(c => c == null)) {
+                setTrigger({type: 'avoided', count: 0})
+                finishedCount.current = 0
+            }
+        }
+    }
+
+    const handleWin = ({ life, trigger }) => {
+        if (trigger > 0 && life > 0 && dungeonCards.length == 0 && countEmpties(roomCards) == 4) {
+            setGameState('win')
+
+        }
     }
 
     const handleRoomClick = (card) => {
-        const { value, suit, power } = card
+        const { suit, power } = card
+
         const removeRoomCard = () => {
             setRoomCards(prev =>
                 prev.map(c => {
@@ -116,16 +130,21 @@ function Game() {
 
         // Ouros = arma
         if (suit == 'Ouros') {
-            removeRoomCard()
-            const actualWeaponsCards = equippedWeapons
-            setEquippedWeapons([card])
+            const actualWeaponsCards = equippedWeapons.map(card => ({...card, cameFrom: 'equipped', goingTo: 'discard'}))
+
+            setEquippedWeapons([{...card, cameFrom: 'room', goingTo: 'equipped'}])
             setDiscardCards(prev => [...prev, ...actualWeaponsCards])
         }
         // Espadas/Paus = monstros
         if (suit == 'Paus' || suit == 'Espadas') {
-            const sub = calcSub(card)
-            
-            removeRoomCard()
+            const {sub, toWhere} = calcSub(card)
+
+            if (toWhere == 'equipped') {
+                setEquippedWeapons(prev => [...prev, {...card, cameFrom: 'room', goingTo: 'equipped'}])
+            } else if (toWhere == 'discard') {
+                setDiscardCards(prev => [...prev, {...card, cameFrom: 'room', goingTo: 'discard'}])
+            }
+
             takeDamage(sub)
         }
 
@@ -133,97 +152,115 @@ function Game() {
             if (!hasPotted) {
                 takePotion(power)
             }
-            removeRoomCard()
-            setDiscardCards(prev => [...prev, card])
+            setDiscardCards(prev => [...prev, {...card, cameFrom: 'room', goingTo: 'discard'}])
         }
+
+        removeRoomCard()
     }
 
     const handleDungeonClick = () => {
-        if (animacoesFinalizadas != baralho.length) return
+        if (dungeonCards.some(c => c.cameFrom == 'start')) return
 
-        if (fillRoom(3)) {
-            nextRound()
+
+        if (countEmpties(roomCards) >= 3) {
+            fillRoom()
         }
     }
 
     const handleMouseEnter = (e, i) => {
         if (roomCards[i] == null) return
+
         setTarget({
             card: roomCards[i],
             x: e.pageX,
             y: e.pageY
         })
-
-        calcSub(roomCards[i], true)
+        setSub(calcSub(roomCards[i]).sub)
     }
 
-    const handleMouseLeave = (e, i) => {
+    const handleMouseLeave = (_, i) => {
         if (roomCards[i] == null) return
 
         setTarget(null)
     }
 
-    function fillRoom (n = 1) {
-        const empties = roomCards.filter(inner => inner === null).length;
-
-        if (empties >= n) {
-            setRoomCards(prev => {
-                const length = dungeonCards.length
-                let i = 0
-
-                return prev.map(c => {
-                    if (c == null) return { ...dungeonCards[length - 1 - i++] }
-                    else return {...c}
-                })
-            })
-
-            setDungeonCards(prev => prev.slice(0, -empties));
-
-            return true
-        } else return null
+    function countEmpties(arr) {
+        return arr.filter(el => !el).length
     }
 
-    function calcSub(card, justCalculate = false) {
+    function fillRoom () {
+        const empties = countEmpties(roomCards)
+
+        if (empties == 0) return
+
+        setRoomCards(prev => {
+            return prev.reduceRight(({ result, source }, c) => {
+                if (c == null && source.length > 0) {
+                    const last = source[source.length - 1]
+
+                    return {
+                        result: [{ ...last, cameFrom: 'dungeon', goingTo: 'room' }, ...result],
+                        source: source.slice(0, -1) // remove o último imutavelmente
+                    }
+                }
+                return { result: [{ ...c }, ...result], source }
+
+                },
+                { result: [], source: dungeonCards }
+            ).result
+        })
+        setDungeonCards(prev => prev.slice(0, -empties))
+        nextRound()
+    }
+
+    function calcSub(card) {
         const last = equippedWeapons.at(-1)
         const weapon = equippedWeapons[0]?.suit == 'Ouros' ? equippedWeapons[0] : {power: 0}
-        let sub
         
         if ((last && (last.suit == 'Espadas' || last.suit == 'Paus') && card.power >= last.power) || weapon.power == 0) {
-            sub = card.power
-             if (!justCalculate) setDiscardCards(prev => [...prev, card])
+            return {sub: card.power, toWhere: 'discard'}
         } else {
-            sub = Math.max(0, (card.power - weapon.power))
-            if (!justCalculate) setEquippedWeapons(prev => [...prev, card])
+            return {sub: Math.max(0, (card.power - weapon.power)), toWhere: 'equipped'}
         }
-
-        setSub(sub)
-        return sub
     }
 
-    const handleReset = () => {
+    const handleSkipRound = () => {
+        if (!isAvoidable) return
+        const actualRoomCards = roomCards.map(c => ({ ...c, cameFrom: 'roomAvoid', goingTo: 'dungeon' }))
+        
+        setRoomCards([null, null, null, null])
+        setDungeonCards(prevDungeon => {
+            const newDungeon = [...actualRoomCards, ...prevDungeon]
+            return newDungeon
+        })   
+        skipRound()
+    }
+
+    const handleReset = (shuffle = true) => {
         resetGame()
 
         const allCards = [
-            ...roomCards.filter(Boolean),   // evita null
-            ...discardCards,
-            ...equippedWeapons,
-            ...dungeonCards,
+            ...roomCards.filter(Boolean)?.map(c => ({ ...c, cameFrom: 'room', goingTo: 'dungeon' })),
+            ...discardCards.map(c => ({ ...c, cameFrom: 'discard', goingTo: 'dungeon' })),
+            ...equippedWeapons.map(c => ({ ...c, cameFrom: 'equipped', goingTo: 'dungeon' })),
         ]
 
-        const preparedCards = allCards.map((card, index) => ({
+        const returningCards = (cards) => cards.map(card => ({
             ...card,
-            initialPos: 0,
-            isInitial: true,
+            isReturning: true,
         }))
-
-        const shuffled = embaralharCartas(preparedCards)
 
         setRoomCards([null, null, null, null])
         setDiscardCards([])
         setEquippedWeapons([])
-        setDungeonCards([...shuffled])
-        setAnimacoesFinalizadas(0)
+        setDungeonCards(prev => {
+            const newDungeonCards = shuffle ?
+                [...embaralharCartas(returningCards([...prev, ...allCards]))] :
+                [...returningCards([...prev, ...allCards])]
+            return newDungeonCards
+        })
     }
+
 
     return (
         <>
@@ -271,7 +308,6 @@ function Game() {
                 initial="initial"
                 animate="in"
                 exit="out"
-                // transition={pageTransition}
             />
             <div className="main-game">
                 <div className="board" style={{
@@ -281,50 +317,22 @@ function Game() {
                         e.stopPropagation()
                         if (dungeonCards.length > 0) handleDungeonClick()
                     }}>
-                        {dungeonCards.map((card, i) => (
+                        {dungeonCards?.map((card, i) => (
                             <Card
-                                key={card.id}
+                                key={`card-${card.id}`}
                                 card={card}
-                                initial={card.isInitial ? {
-                                    y: card.initialPos || window.innerHeight,
-                                    x: card.initialPos || -window.innerWidth,
-                                    rotate: -10,
-                                } : false}
-                                animate={{
-                                    y: -i * .5,
-                                    x: 0,
-                                    rotate: 0,
-                                }}
-                                transition={{
-                                    duration: 0.7,
-                                    ease: 'easeOut',
-                                    delay: i * 0.05    // Efeito de cascata
-                                }}
-                                flipInitial={!card.isInitial ? {
-                                    rotateY: -180,
-                                } : null}
-                                flipAnimate={!card.isInitial ? {
-                                    rotateY: 0,
-                                } : null}
-                                flipTransition={{
-                                    duration: 0.5,
-                                    ease: 'backInOut',
-                                    delay: i * 0.1    // Efeito de cascata
-                                }}
+                                index={i}
                                 actualDeck={actualDeck}
-                                onAnimationComplete={() => {
-                                    if (!card.isInitial) return
-                                    setAnimacoesFinalizadas(prev => prev + 1)
-                                }}
+                                onAnimationComplete={(c) => handleComplete(c)}
                             />
                         ))}
                     </div>
                     <div className="room">
                         {[3, 2, 1, 0]
                             .map((i) => (
-                                <div 
-                                    className="card-place" 
-                                    key={i}
+                                <div
+                                    className="card-place"
+                                    key={`room-${i}`}
                                     onMouseEnter={(e) => handleMouseEnter(e, i)}
                                     onMouseLeave={(e) => handleMouseLeave(e, i)}
                                     onClick={(e) => {
@@ -337,26 +345,9 @@ function Game() {
                                 >
                                     {roomCards[i]?.value && (
                                         <Card
-                                            key={roomCards[i].id}
+                                            key={`card-${roomCards[i].id}`}
+                                            index={i}
                                             card={roomCards[i]}
-                                            initial={false}
-                                            animate={false}
-                                            transition={{
-                                                duration: 0.5,
-                                                ease: 'easeOut',
-                                                delay: i * 0.2    // Efeito de cascata
-                                            }}
-                                            flipInitial={{
-                                                rotateY: 0,
-                                            }}
-                                            flipAnimate={{
-                                                rotateY: -180,
-                                            }}
-                                            flipTransition={{
-                                                duration: 0.5,
-                                                ease: 'backInOut',
-                                                delay: i * 0.1    // Efeito de cascata
-                                            }}
                                             actualDeck={actualDeck}
                                         />
                                     )}
@@ -368,25 +359,13 @@ function Game() {
                         {discardCards.length > 0 && (
                             discardCards.map((card, i) => (
                                 <Card
-                                    key={card.id}
+                                    key={`card-${card.id}`}
+                                    index={i}
                                     card={card}
-                                    initial={false}
-                                    animate={{
-                                        y: -i * .5,
-                                        x: 0,
+                                    flipTransition={{
+                                        duration: .5,
+                                        ease: 'backInOut'
                                     }}
-                                    transition={{
-                                        duration: 0.5,
-                                        ease: 'easeOut',
-                                        // delay: i * 0.2    // Efeito de cascata
-                                    }}
-                                    flipInitial={{
-                                        rotateY: -180,
-                                    }}
-                                    flipAnimate={{
-                                        rotateY: 0,
-                                    }}
-                                    flipTransition={false}
                                     actualDeck={actualDeck}
                                 />
                             ))
@@ -396,23 +375,9 @@ function Game() {
                         {equippedWeapons.length > 0 && (
                             equippedWeapons.map((card, i) => (
                                 <Card
-                                    key={card.id}
+                                    key={`card-${card.id}`}
+                                    index={i}
                                     card={card}
-                                    initial={{
-                                        x: i !== 0 ? 15 + i * 25 : 0,
-                                        y: i !== 0 ? 5 + i * 15 : 0
-                                    }}
-                                    animate={false}
-                                    transition={{
-                                        duration: 0.5,
-                                        ease: 'easeOut',
-                                        // delay: i * 0.2    // Efeito de cascata
-                                    }}
-                                    flipInitial={{
-                                        rotateY: -180,
-                                    }}
-                                    flipAnimate={false}
-                                    flipTransition={false}
                                     actualDeck={actualDeck}
                                 />
                             ))
@@ -422,22 +387,26 @@ function Game() {
                         <Die
                             face={life > 0 ? life : 1}
                         />
-                        {/* <input type="number" value={life} onChange={(e) => setLife(e.target.value)}/> */}
                     </div>
                     <div className='bttns-container'>
                         <button
                             className='bttn md'
-                            onClick={skipRound}
-                            disabled={roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4}
+                            onClick={handleSkipRound}
+                            disabled={!isAvoidable}
                         >
                             Avoid
                         </button>
                         <button
                             className='bttn md'
                             onClick={() => setGameState('gameOver')}
-                            // disabled={roomCards.some(c => !c) || (roundSkipped == round - 1 && round != 1) || dungeonCards.length < 4}
                         >
                             Give Up
+                        </button>
+                        <button
+                            className='bttn md'
+                            onClick={() => setDungeonCards(prev => [...embaralharCartas(prev)])}
+                        >
+                            Shuffle
                         </button>
                     </div>
                 </div>
